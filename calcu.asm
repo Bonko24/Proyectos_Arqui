@@ -1,14 +1,14 @@
 ;Anthony Rodriguez 2021120181
-;Calculadora basica que realiza suma, resta, multiplicacion y division de 2 numeros de 1 digito
-;Si el usuario ingresa algo en linea de comandos se le mostrara un mensaje de ayuda
-;Si el usuario no ingresa nada en linea de comandos se ejecutara la calculadora normalmente
+;Calculadora basica que realiza suma, resta, multiplicacion y division de 2 numeros de 3 digitos
+;Si el usuario no ingresa algo en linea de comandos se le mostrara un mensaje de ayuda
+;Si el usuario ingresa la operacion en linea de comandos se ejecutara la calculadora normalmente
 
 ;---------------------------------------------------------
 ;Para compilar usar:
 ;1) tener el archivo compilar.bat en la misma carpeta que los archivos .asm
 ;2) copiar esto en el DosBox: compilar tc7 proc
-;3) td tc7 (debugear)  o  tc7 (ejecutar)
-;NOTA: si agrega algo luego del nombre tc7 imprimira el mensaje de ayuda
+;3) td tc7 "operacion" (debugear)  o  tc7 "operacion" (ejecutar)
+;NOTA: sino agrega la operacion luego del nombre tc7 imprimira el mensaje de ayuda
 ;--------------------------------------------------------- 
 
 ;llamadas a procedimientos en proc.asm
@@ -21,15 +21,15 @@ Pila EndS
 
 Datos Segment
     LongLC      EQU 80h
-    ayuda       db 10,13,"Bienvenido y gracias por usar mi calculadora, por favor no ingrese nada en linea de comandos para ejecutar el programa",24h
-    errorNum    db 10,13,"Error: Solo se permiten numeros de 1 digito (0-9)",  10,13,  "Presione cualquier tecla...",24h
+    ayuda       db 10,13,"Por favor ingrese por linea de comandos la operacion que desee realizar, con numeros de maximo 3 cifras y el operando...,",10,13,"Ejemplo: 123 + 456",24h
+    errorNum    db 10,13,"Error: Solo se permiten numeros de 3 digitos (000-999)",  10,13,  "Presione cualquier tecla...",24h
     errorOp     db 10,13,"Error: Operando no valido",  10,13,  "Presione cualquier tecla...",24h
     errorDiv    db 10,13,"Error: No se puede dividir por 0",  10,13,  "Presione cualquier tecla...",24h
 
     ;introduccion de valores y menu
-    mensajeRep  db 10,13,10,13,"Desea realizar algun otro calculo?",  10,13  ,"1)  SI",  10,13  ,"2)  NO",10,13,24h
-    mensajeNum  db 10,13,"Digite un numero de 1 digito:       ",24h
-    mensajeOper db 10,13,10,13,"Que operacion desea realizar?",  10,13  ,"1)  Suma (+)",  10,13  ,"2)  Resta (-)",  10,13  ,"3)  Multiplicacion (*)",  10,13  ,"4)  Division (/)",10,13,24h
+    ;mensajeRep  db 10,13,10,13,"Desea realizar algun otro calculo?",  10,13  ,"1)  SI",  10,13  ,"2)  NO",10,13,24h
+    ;mensajeNum  db 10,13,"Digite un numero de 1 digito:       ",24h
+    ;mensajeOper db 10,13,10,13,"Que operacion desea realizar?",  10,13  ,"1)  Suma (+)",  10,13  ,"2)  Resta (-)",  10,13  ,"3)  Multiplicacion (*)",  10,13  ,"4)  Division (/)",10,13,24h
 
     ;impresion de resultados
     RSuma       db 10,13,10,13,"El resultado de la suma es: ",24h
@@ -39,13 +39,21 @@ Datos Segment
     RRes        db 10,13,10,13,"El residuo de la division es: ",24h
 
     ;numeros y variables
-    num1        dw ?
-    num2        dw ?
-    operando    db ?                            ;variable para almacenar el operando ingresado
-    var         db ?                            ;variable para almacenar la respuesta de si desea repetir
-    d           db ?                            ;variable para almacenar el digito de las decenas
-    u           db ?                            ;variable para almacenar el digito de las unidades
+    num1        dw ?                            ;variables para almacenar los numeros ingresados
+    num2        dw ?                            ;variables para almacenar los numeros ingresados
+    operando    db "+"                          ;variable para almacenar el operando ingresado
+    ;var         db ?                           ;variable para almacenar la respuesta de si desea repetir
+    cMillar     db ?                            ;variable para almacenar el digito de las centenas de millar
+    dMillar     db ?                            ;variable para almacenar el digito de las decenas de millar
+    uMillar     db ?                            ;variable para almacenar el digito de las unidades de millar
+    c           db ?                            ;variable para almacenar el digito de las centenas del num1
+    d           db ?                            ;variable para almacenar el digito de las decenas del num1
+    u           db ?                            ;variable para almacenar el digito de las unidades del num1
+    c1          db ?                            ;variable para almacenar el digito de las centenas del num2
+    d1          db ?                            ;variable para almacenar el digito de las decenas del num2
+    u1          db ?                            ;variable para almacenar el digito de las unidades del num2
     conver1     dw ?                            ;variable para almacenar las decenas multiplicadas por 10
+    conver2     dw ?                            ;variable para almacenar las centenas multiplicadas por 100
 
     ;resultados
     suma        dw ?
@@ -102,9 +110,9 @@ Inicio:
     push ax
     call GetCommanderLine
     
-    mov bh, byte ptr DS:[LongLC]                ;poner en bh el numero de caracteres que tiene la linea de comandos (len)
-    cmp bh,0                                    ;compara para ver si es vacio
-    jne puente
+    ;mov bh, byte ptr DS:[LongLC]                ;poner en bh el numero de caracteres que tiene la linea de comandos (len)
+    ;cmp bh,0                                    ;compara para ver si es vacio
+    ;je puente
     jmp short calculadora                       ;en caso de no ser igual salta a calculadora
 
 puente:                                         ;puente para saltar ayuda en caso de ingresar algo en linea de comandos
@@ -117,100 +125,114 @@ puente:                                         ;puente para saltar ayuda en cas
         mov es,ax                               ;poner es = ds
         pop ds                                  ;recuperar ds
 
-        pedirNum1:     
-        mov d,0                                 ;inicializar d en 0 para evitar errores si solo se ingresa un digito
-        mov conver1,0                           ;inicializar conver1 en 0 para evitar errores si solo se ingresa un digito
-        mov dx,offset mensajeNum                ;mensaje para pedir num1
-        pushA
-        call PrintString
-        push word ptr u                         ;reservar espacio en la pila para u
-        pushA
-        call ReadKey
-        pop word ptr u                          ;con este pop se pone el valor almacenado en la pila ingresado con ReadKey en la var u
-        xor bp,bp                               ;limpiar registro bp
-        sub u,30h                               ;convertir de ASCII a valor numerico
+        mov cx,0                                ;limpiar cx para realizar ajuste
+        ajustar:
+            mov cMillar,0                       ;variable para almacenar el digito de las centenas de millar
+            mov dMillar,0                       ;variable para almacenar el digito de las decenas de millar
+            mov uMillar,0                       ;variable para almacenar el digito de las unidades de millar
+            mov c,4                             ;variable para almacenar el digito de las centenas
+            mov d,2                             ;variable para almacenar el digito de las decenas
+            mov u,3                             ;variable para almacenar el digito de las unidades
+            mov c1,3                            ;variable para almacenar el digito de las centenas del num2
+            mov d1,5                            ;variable para almacenar el digito de las decenas del num2
+            mov u1,4                            ;variable para almacenar el digito de las unidades del num2
+            mov conver1,0                       ;variable para almacenar las decenas multiplicadas por 10
+            mov conver2,0                       ;variable para almacenar las centenas multiplicadas por 100
+            cmp cx,1                            ;comparar si cx es 1 (si ya se ingreso num1)
+            je ajustarC1                        ;si es 1 saltar a ajustarC1
 
-            armar1:                             ;etiqueta para armar num1
+            ajustarC:
+                cmp c,0                         ;comparar si c es 0
+                jz ajustarD                     ;si es 0 saltar a ajustar d
+                mov ax,00                       ;limpiar ax
+                mov al,c                        ;poner en al el valor de c
+                mov bl,100                      ;poner en bl 100
+                mul bl                          ;multiplicar al por 100
+                mov conver1,ax                  ;guardar el resultado en conver1
+            
+            ajustarD:
+                cmp d,0                         ;comparar si d es 0
+                jz armar1                       ;si es 0 saltar a armar u
+                mov ax,0                        ;limpiar ax
+                mov al,d                        ;poner en al el valor de d
+                mov bl,10                       ;poner en bl 10
+                mul bl                          ;multiplicar al por 10
+                mov conver2,ax                  ;mover el resultado a conver2
+
+            armar1:                             ;etiqueta para armar num1 tomado de linea de comandos
                 xor ax,ax                       ;limpiar ax
                 mov ax,conver1                  ;poner en ax el valor de conver1
-                add num1,ax                     ;sumar d a num1
-                xor ax,ax                       ;limpiar ax
+                add num1,ax                     ;sumar conver1 a num1
+                mov ax,conver2                  ;poner en ax el valor de conver2
+                add num1,ax                     ;sumar conver2 a num1
                 mov al,u                        ;poner en al el valor de u
                 add num1,ax                     ;sumar u a num1
 
                 ;validar num1
-                cmp num1,0                      ;comparar si num1 es menor a 0
-                jl errorNum1                    ;si es menor a 0 saltar a errorNum1
-                cmp num1,9                      ;comparar si num1 es mayor a 9
-                jg errorNum1                    ;si es mayor a 9 saltar a errorNum1
-                jmp short pedirNum2             ;si es valido continuar
-
-                errorNum1:
-                    mov dx, offset errorNum     ;mensaje de error num1
-                    pushA
-                    call PrintString
-                    call WaitKeyP               ;esperar a que el usuario presione una tecla
-                    mov num1,0                  ;reiniciar num1 en caso de error
-                    jmp short pedirNum1         ;saltar a pedirNum1 nuevamente
-
-        pedirNum2:
-        mov dx,offset mensajeNum                ;mensaje para pedir num2
-        pushA
-        call PrintString
-        push word ptr u                         ;reservar espacio en la pila para u
-        pushA
-        call ReadKey
-        pop word ptr u                          ;con este pop se pone el valor almacenado en la pila ingresado con ReadKey en la var u
-        xor bp,bp                               ;limpiar registro bp
-        sub u,30h                               ;convertir de ASCII a valor numerico
+                cmp num1,000d                   ;comparar si num1 es menor a 000
+                jl errorNums                    ;si es menor a 0 saltar a errorNum
+                cmp num1,999d                   ;comparar si num1 es mayor a 999
+                jg errorNums                    ;si es mayor a 999 saltar a errorNum
+                mov cx,1                        ;poner cx en 1 para indicar que ya se ingreso num1
+                jmp ajustar               ;si es valido continuar con num2
         
-            armar2:                             ;etiqueta para armar num2
+            ajustarC1:
+                mov conver1,0                   ;variable para almacenar las decenas multiplicadas por 10
+                mov conver2,0                   ;variable para almacenar las centenas multiplicadas por 100
+                cmp c1,0                        ;comparar si c es 0
+                jz ajustarD1                    ;si es 0 saltar a ajustar d
+                mov ax,00                       ;limpiar ax
+                mov al,c1                       ;poner en al el valor de c
+                mov bl,100                      ;poner en bl 100
+                mul bl                          ;multiplicar al por 100
+                mov conver1,ax                  ;guardar el resultado en conver1
+            
+            ajustarD1:
+                cmp d1,0                        ;comparar si d es 0
+                jz armar2                       ;si es 0 saltar a armar u
+                mov ax,0                        ;limpiar ax
+                mov al,d1                       ;poner en al el valor de d
+                mov bl,10                       ;poner en bl 10
+                mul bl                          ;multiplicar al por 10
+                mov conver2,ax                  ;mover el resultado a conver2
+
+            armar2:                             ;etiqueta para armar num1 tomado de linea de comandos
                 xor ax,ax                       ;limpiar ax
                 mov ax,conver1                  ;poner en ax el valor de conver1
-                add num2,ax                     ;sumar d a num2
-                xor ax,ax                       ;limpiar ax
+                add num2,ax                     ;sumar conver1 a num2
+                mov ax,conver2                  ;poner en ax el valor de conver2
+                add num2,ax                     ;sumar conver2 a num2
                 mov al,u                        ;poner en al el valor de u
                 add num2,ax                     ;sumar u a num2
 
                 ;validar num2
-                cmp num2,0                      ;comparar si num2 es menor a 0
-                jl errorNum2                    ;si es menor a 0 saltar a errorNum2
-                cmp num2,9                      ;comparar si num2 es mayor a 9
-                jg errorNum2                    ;si es mayor a 9 saltar a errorNum2
+                cmp num2,000d                   ;comparar si num2 es menor a 0
+                jl errorNums                    ;si es menor a 000 saltar a errorNum
+                cmp num2,999d                   ;comparar si num2 es mayor a 999
+                jg errorNums                    ;si es mayor a 999 saltar a errorNum
                 jmp short siga1                 ;si es valido continuar
 
-                errorNum2:
-                    mov dx, offset errorNum     ;mensaje de error num2
+                errorNums:
+                    mov dx, offset errorNum     ;mensaje de error numero
                     pushA
                     call PrintString
                     call WaitKeyP               ;esperar a que el usuario presione una tecla
+                    mov num1,0                  ;reiniciar num1 en caso de error
                     mov num2,0                  ;reiniciar num2 en caso de error
-                    jmp short pedirNum2         ;saltar a pedirNum2 nuevamente
+                    jmp ayudas                  ;saltar a ayudas
 
-puente1:
-    jmp Inicio
-puente2:
-    jmp calculadora
-
-        siga1:
-            ;pedir operando
-            mov dx,offset mensajeOper           ;mensaje para pedir operando
-            pushA
-            call PrintString                                                    
-            push word ptr operando              ;reservar espacio en la pila para operando
-            pushA
-            call ReadKey
-            pop word ptr operando               ;con este pop se pone el valor almacenado en la pila ingresado con ReadKey en la var operando
+        siga1:                                  ;etiqueta para leer y comparar operando
+            ;leer operando
             xor bp,bp                           ;limpiar registro bp
 
             ;comparar operando
-            cmp operando,"1"                    ;comparar si es +
+            cmp operando,"+"                    ;comparar si es +
             je sumaOp                           ;si es + saltar a sumaOp
-            cmp operando,"2"                    ;comparar si es -
-            je restaOp                          ;si es - saltar a restaOp
-            cmp operando,"3"                    ;comparar si es *
+            cmp operando,"-"                    ;comparar si es -
+            je puenteRes                          ;si es - saltar a restaOp
+            cmp operando,"*"                    ;comparar si es *
             je puenteMult                       ;si es * saltar a puenteMult
-            cmp operando,"4"                    ;comparar si es /
+            cmp operando,"/"                    ;comparar si es /
             je puenteDiv                        ;si es / saltar a divOp
             jmp short errorOper                 ;si no es ninguno de los 4 saltar a inicio
 
@@ -220,7 +242,7 @@ puente2:
                 call PrintString
                 call WaitKeyP                   ;esperar a que el usuario presione una tecla
                 mov operando,0                  ;reiniciar operando en caso de error
-                jmp short siga1                 ;saltar a pedir operando nuevamente
+                jmp short puenteAyudas          ;saltar a ayudas
 
         sumaOp:
             xor ax,ax                           ;limpiar ax
@@ -229,7 +251,16 @@ puente2:
             add suma, ax                        ;sumar num1 a suma
             mov ax, num2                        ;poner en ax el valor de num2
             add suma, ax                        ;sumar num2 a suma
+            jmp short sigaSuma
+
+puenteRes:
+    jmp restaOp                                 ;saltar a restaOp
+puenteMult:
+    jmp puenteMult1                             ;saltar a multOp
+puenteDiv:
+    jmp puenteDiv1                              ;saltar a divOp
             
+            sigaSuma:
             ;imprimir resultado
             mov dx, offset RSuma                ;mensaje de resultado suma
             pushA
@@ -238,17 +269,24 @@ puente2:
             aam                                 ;ajustar ax para separar decenas y unidades
             mov u,al                            ;guardar unidades en u
             mov al,ah                           ;pasar decenas a al
+            aam                                 ;ajustar ax para separar centenas y decenas
             mov d,al                            ;guardar decenas en d
+            mov al,ah                           ;pasar centenas a al
+            aam                                 ;ajustar ax para separar centenas y decenas
+            mov c,al                            ;guardar centenas en c
+            mov uMillar,ah                      ;guardar millares en uMillar
+            push word ptr uMillar               ;reservar espacio en la pila para uMillar
+            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
+            push word ptr c                     ;reservar espacio en la pila para c
+            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
             push word ptr d                     ;reservar espacio en la pila para d
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
             push word ptr u                     ;reservar espacio en la pila para u
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            jmp short puente3                   ;saltar a repetir
+            jmp short puenteSalir1              ;saltar a salir
 
-puenteMult:
-    jmp multOp                                  ;saltar a multOp
-puenteDiv:
-    jmp divOp                                   ;saltar a divOp
+puenteAyudas:
+    jmp puenteAyudas1                           ;saltar a ayudas
 
         restaOp:
             xor ax,ax                           ;limpiar ax
@@ -269,12 +307,37 @@ puenteDiv:
             call PrintCharP                     ;llamar a PrintCharP para imprimir el signo negativo
             pop dx
             neg ax                              ;hacer positivo el valor de ax
+            jmp short positivo
+
+puenteMult1:
+    jmp multOp                                  ;saltar a multOp
 
             positivo:
-                push ax                         ;pasar el valor de ax por pila para imprimirlo
+                aam                             ;ajustar ax para separar decenas y unidades
+                mov u,al                        ;guardar unidades en u
+                mov al,ah                       ;pasar decenas a al
+                aam                             ;ajustar ax para separar centenas y decenas
+                mov d,al                        ;guardar decenas en d
+                mov al,ah                       ;pasar centenas a al
+                aam                             ;ajustar ax para separar centenas y decenas
+                mov c,al                        ;guardar centenas en c
+                mov uMillar,ah                  ;guardar millares en uMillar
+                push word ptr uMillar           ;reservar espacio en la pila para uMillar
                 call PrintNum                   ;llamar a PrintNum para imprimir el resultado
-                pop ax                          ;recuperar ax
-                jmp short puente3               ;saltar a repetir
+                push word ptr c                 ;reservar espacio en la pila para c
+                call PrintNum                   ;llamar a PrintNum para imprimir el resultado
+                push word ptr d                 ;reservar espacio en la pila para d
+                call PrintNum                   ;llamar a PrintNum para imprimir el resultado
+                push word ptr u                 ;reservar espacio en la pila para u
+                call PrintNum                   ;llamar a PrintNum para imprimir el resultado
+                jmp short puenteSalir1          ;saltar a salir
+
+puenteDiv1:
+    jmp divOp                                   ;saltar a divOp
+puenteAyudas1:
+    jmp ayudas                                  ;saltar a ayudas
+puenteSalir1:
+    jmp puenteSalir2                             ;saltar a salir
 
         multOp:
             xor ax,ax                           ;limpiar ax
@@ -291,17 +354,34 @@ puenteDiv:
             aam                                 ;ajustar ax para separar decenas y unidades
             mov u,al                            ;guardar unidades en u
             mov al,ah                           ;pasar decenas a al
+            aam                                 ;ajustar ax para separar centenas y decenas
             mov d,al                            ;guardar decenas en d
+            mov al,ah                           ;pasar centenas a al
+            aam                                 ;ajustar ax para separar centenas y decenas
+            mov c,al                            ;guardar centenas en c
+            mov al,ah                           ;pasar millares a al
+            aam                                 ;ajustar ax para separar centenas y decenas
+            mov uMillar,al                      ;guardar unidades de millar en uMillar
+            mov al,ah                           ;pasar decenas de millar a al
+            aam                                 ;ajustar ax para separar centenas y decenas
+            mov dMillar,al                      ;guardar decenas de millar en dMillar
+            mov cMillar,ah                      ;guardar centenas de millar en cMillar
+            push word ptr cMillar               ;reservar espacio en la pila para cMillar
+            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
+            push word ptr dMillar               ;reservar espacio en la pila para dMillar
+            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
+            push word ptr uMillar               ;reservar espacio en la pila para uMillar
+            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
+            push word ptr c                     ;reservar espacio en la pila para c
+            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
             push word ptr d                     ;reservar espacio en la pila para d
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
             push word ptr u                     ;reservar espacio en la pila para u
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            jmp short puente3                   ;saltar a repetir
+            jmp short puenteSalir2              ;saltar a salir
 
-puente3:
-    jmp repetir
-puente4:
-    jmp puente1
+puenteSalir2:
+    jmp puenteSalir                             ;saltar a salir
 
         divOp:
             xor ax,ax                           ;limpiar ax
@@ -338,7 +418,7 @@ puente4:
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
             push word ptr u                     ;reservar espacio en la pila para u
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            jmp short puente3                   ;saltar a repetir
+            jmp short puenteSalir               ;saltar a salir
 
                 error:
                     mov dx, offset errorDiv     ;mensaje de error division por 0
@@ -346,32 +426,8 @@ puente4:
                     call PrintString
                     call WaitKeyP               ;esperar a que el usuario presione una tecla
 
-            reiniciarVar:
-                mov num1,0                      ;reiniciar num1 en caso de que el usuario desee hacer otra operacion
-                mov num2,0                      ;reiniciar num2 en caso de que el usuario desee hacer otra operacion
-                mov suma,0                      ;reiniciar suma en caso de que el usuario desee hacer otra operacion
-                mov resta,0                     ;reiniciar resta en caso de que el usuario desee hacer otra operacion
-                mov mult,0                      ;reiniciar mult en caso de que el usuario desee hacer otra operacion
-                mov cociente,0                  ;reiniciar cociente en caso de que el usuario desee hacer otra operacion
-                mov residuo,0                   ;reiniciar residuo en caso de que el usuario desee hacer otra operacion
-                jmp puente4                     ;saltar a pedir num1 nuevamente
-
-        repetir:
-        ;si el usuario desea realizar otra operacion
-        mov dx,offset mensajeRep                ;mensaje para pedir si desea repetir
-        pushA
-        call PrintString
-        push word ptr var                       ;reservar espacio en la pila para var
-        pushA
-        call ReadKey
-        pop word ptr var                        ;con este pop se pone el valor almacenado en la pila ingresado con ReadKey en la var var
-        xor bp,bp                               ;limpiar registro bp
-
-        ;comparar respuesta
-        cmp var,31h                             ;comparar si es 1 (si)
-        je reiniciarVar                         ;si es 1 saltar a reiniciarVar
-
         ;final
+        puenteSalir:
         jmp short salga                         ;saltar a salida del programa
 
 
