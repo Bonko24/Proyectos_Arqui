@@ -41,7 +41,7 @@ Datos Segment
     ;numeros y variables
     num1        dw ?                            ;variables para almacenar los numeros ingresados
     num2        dw ?                            ;variables para almacenar los numeros ingresados
-    operando    db "+"                          ;variable para almacenar el operando ingresado
+    operando    db "*"                          ;variable para almacenar el operando ingresado
     ;var         db ?                           ;variable para almacenar la respuesta de si desea repetir
     cMillar     db ?                            ;variable para almacenar el digito de las centenas de millar
     dMillar     db ?                            ;variable para almacenar el digito de las decenas de millar
@@ -130,12 +130,12 @@ puente:                                         ;puente para saltar ayuda en cas
             mov cMillar,0                       ;variable para almacenar el digito de las centenas de millar
             mov dMillar,0                       ;variable para almacenar el digito de las decenas de millar
             mov uMillar,0                       ;variable para almacenar el digito de las unidades de millar
-            mov c,4                             ;variable para almacenar el digito de las centenas
+            mov c,2                             ;variable para almacenar el digito de las centenas
             mov d,2                             ;variable para almacenar el digito de las decenas
-            mov u,3                             ;variable para almacenar el digito de las unidades
-            mov c1,3                            ;variable para almacenar el digito de las centenas del num2
-            mov d1,5                            ;variable para almacenar el digito de las decenas del num2
-            mov u1,4                            ;variable para almacenar el digito de las unidades del num2
+            mov u,2                             ;variable para almacenar el digito de las unidades
+            mov c1,2                            ;variable para almacenar el digito de las centenas del num2
+            mov d1,2                            ;variable para almacenar el digito de las decenas del num2
+            mov u1,2                            ;variable para almacenar el digito de las unidades del num2
             mov conver1,0                       ;variable para almacenar las decenas multiplicadas por 10
             mov conver2,0                       ;variable para almacenar las centenas multiplicadas por 100
             cmp cx,1                            ;comparar si cx es 1 (si ya se ingreso num1)
@@ -202,7 +202,7 @@ puente:                                         ;puente para saltar ayuda en cas
                 add num2,ax                     ;sumar conver1 a num2
                 mov ax,conver2                  ;poner en ax el valor de conver2
                 add num2,ax                     ;sumar conver2 a num2
-                mov al,u                        ;poner en al el valor de u
+                mov al,u1                       ;poner en al el valor de u
                 add num2,ax                     ;sumar u a num2
 
                 ;validar num2
@@ -265,16 +265,18 @@ puenteDiv:
             mov dx, offset RSuma                ;mensaje de resultado suma
             pushA
             call PrintString
+            xor ax,ax                           ;limpiar ax
             mov ax, suma                        ;poner en ax el valor de suma
-            aam                                 ;ajustar ax para separar decenas y unidades
-            mov u,al                            ;guardar unidades en u
-            mov al,ah                           ;pasar decenas a al
-            aam                                 ;ajustar ax para separar centenas y decenas
-            mov d,al                            ;guardar decenas en d
-            mov al,ah                           ;pasar centenas a al
-            aam                                 ;ajustar ax para separar centenas y decenas
-            mov c,al                            ;guardar centenas en c
-            mov uMillar,ah                      ;guardar millares en uMillar
+            mov dl,10                           ;poner en dl 10 para ajustar
+            div dl                              ;separar unidades
+            mov u,ah                            ;guardar unidades en u
+            mov ah,00h                          ;limpiar ah
+            div dl                              ;separar decenas y centenas
+            mov d,ah                            ;guardar decenas en d
+            mov ah,00h                          ;limpiar ah
+            div dl                              ;separar centenas y uMillar
+            mov c,ah                            ;guardar centenas en c
+            mov uMillar,al                      ;guardar miles en uMillar
             push word ptr uMillar               ;reservar espacio en la pila para uMillar
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
             push word ptr c                     ;reservar espacio en la pila para c
@@ -306,6 +308,7 @@ puenteAyudas:
             push dx                             ;pasar el signo negativo por pila
             call PrintCharP                     ;llamar a PrintCharP para imprimir el signo negativo
             pop dx
+            mov ax,resta
             neg ax                              ;hacer positivo el valor de ax
             jmp short positivo
 
@@ -313,15 +316,16 @@ puenteMult1:
     jmp multOp                                  ;saltar a multOp
 
             positivo:
-                aam                             ;ajustar ax para separar decenas y unidades
-                mov u,al                        ;guardar unidades en u
-                mov al,ah                       ;pasar decenas a al
-                aam                             ;ajustar ax para separar centenas y decenas
-                mov d,al                        ;guardar decenas en d
-                mov al,ah                       ;pasar centenas a al
-                aam                             ;ajustar ax para separar centenas y decenas
-                mov c,al                        ;guardar centenas en c
-                mov uMillar,ah                  ;guardar millares en uMillar
+                mov dl,10                       ;poner en dl 10 para ajustar
+                div dl                          ;separar unidades
+                mov u,ah                        ;guardar unidades en u
+                mov ah,00h                      ;limpiar ah
+                div dl                          ;separar decenas y centenas
+                mov d,ah                        ;guardar decenas en d
+                mov ah,00h                      ;limpiar ah
+                div dl                          ;separar centenas y uMillar
+                mov c,ah                        ;guardar centenas en c
+                mov uMillar,al                  ;guardar miles en uMillar
                 push word ptr uMillar           ;reservar espacio en la pila para uMillar
                 call PrintNum                   ;llamar a PrintNum para imprimir el resultado
                 push word ptr c                 ;reservar espacio en la pila para c
@@ -332,12 +336,13 @@ puenteMult1:
                 call PrintNum                   ;llamar a PrintNum para imprimir el resultado
                 jmp short puenteSalir1          ;saltar a salir
 
+puenteSalir1:
+    jmp puenteSalir2                            ;saltar a salir
 puenteDiv1:
     jmp divOp                                   ;saltar a divOp
 puenteAyudas1:
     jmp ayudas                                  ;saltar a ayudas
-puenteSalir1:
-    jmp puenteSalir2                             ;saltar a salir
+
 
         multOp:
             xor ax,ax                           ;limpiar ax
@@ -351,21 +356,26 @@ puenteSalir1:
             pushA
             call PrintString
             mov ax, mult                        ;poner en ax el valor de mult
-            aam                                 ;ajustar ax para separar decenas y unidades
-            mov u,al                            ;guardar unidades en u
-            mov al,ah                           ;pasar decenas a al
-            aam                                 ;ajustar ax para separar centenas y decenas
-            mov d,al                            ;guardar decenas en d
-            mov al,ah                           ;pasar centenas a al
-            aam                                 ;ajustar ax para separar centenas y decenas
-            mov c,al                            ;guardar centenas en c
-            mov al,ah                           ;pasar millares a al
-            aam                                 ;ajustar ax para separar centenas y decenas
-            mov uMillar,al                      ;guardar unidades de millar en uMillar
-            mov al,ah                           ;pasar decenas de millar a al
-            aam                                 ;ajustar ax para separar centenas y decenas
-            mov dMillar,al                      ;guardar decenas de millar en dMillar
-            mov cMillar,ah                      ;guardar centenas de millar en cMillar
+            xor bx,bx                           ;limpiar bx
+            mov bh,ah                           ;separar resultado multiplicacion
+            mov ah,00h                          ;limpiar ah
+            mov dl,10                           ;poner en dl 10 para ajustar
+            div dl                              ;separar unidades
+            mov u,ah                            ;guardar unidades en u
+            mov ah,00h                          ;limpiar ah
+            div dl                              ;separar decenas y centenas
+            mov d,ah                            ;guardar decenas en d
+            mov ah,00h                          ;limpiar ah
+            div dl                              ;separar centenas y uMillar
+            mov c,ah                            ;guardar centenas en c
+            mov ah,00h                          ;limpiar ah
+            mov al,bh
+            div dl                              ;separar uNmillar
+            mov uMillar,ah                      ;guardar miles en uMillar
+            mov ah,00h                          ;limpiar ah
+            div dl                              ;separar dMillar y cMillar
+            mov dMillar,ah                      ;guardar dMillar
+            mov cMillar,al                      ;guardar cMillar
             push word ptr cMillar               ;reservar espacio en la pila para cMillar
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
             push word ptr dMillar               ;reservar espacio en la pila para dMillar
