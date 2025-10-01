@@ -62,6 +62,22 @@ Datos Segment
     cociente    db ?
     residuo     db ?
 
+    ;variables para multiplicacion
+    registro    db ?
+    auxiliar    db ?
+    cero        db ?
+    uno         db ?
+    dos         db ?
+    tres        db ?
+    cuatro      db ?    
+    cinco       db ?
+    seis        db ?
+    siete       db ?
+    ocho        db ?
+    nueve       db ?
+    diez        db ?
+    once        db ?
+
     linecommand db 0FFh Dup (?)                 ;variable para almacenar la linea de comandos
 Datos EndS
 
@@ -130,12 +146,12 @@ puente:                                         ;puente para saltar ayuda en cas
             mov cMillar,0                       ;variable para almacenar el digito de las centenas de millar
             mov dMillar,0                       ;variable para almacenar el digito de las decenas de millar
             mov uMillar,0                       ;variable para almacenar el digito de las unidades de millar
-            mov c,2                             ;variable para almacenar el digito de las centenas
-            mov d,2                             ;variable para almacenar el digito de las decenas
-            mov u,2                             ;variable para almacenar el digito de las unidades
-            mov c1,2                            ;variable para almacenar el digito de las centenas del num2
-            mov d1,2                            ;variable para almacenar el digito de las decenas del num2
-            mov u1,2                            ;variable para almacenar el digito de las unidades del num2
+            mov c,9                             ;variable para almacenar el digito de las centenas
+            mov d,9                             ;variable para almacenar el digito de las decenas
+            mov u,9                             ;variable para almacenar el digito de las unidades
+            mov c1,9                            ;variable para almacenar el digito de las centenas del num2
+            mov d1,9                            ;variable para almacenar el digito de las decenas del num2
+            mov u1,9                            ;variable para almacenar el digito de las unidades del num2
             mov conver1,0                       ;variable para almacenar las decenas multiplicadas por 10
             mov conver2,0                       ;variable para almacenar las centenas multiplicadas por 100
             cmp cx,1                            ;comparar si cx es 1 (si ya se ingreso num1)
@@ -346,47 +362,149 @@ puenteAyudas1:
 
         multOp:
             xor ax,ax                           ;limpiar ax
-            mov ax, num1                        ;poner en ax el valor de num1
-            mov bx, num2                        ;poner en bx el valor de num2
-            mul bx                              ;multiplicar ax por bx
-            mov mult, ax                        ;almacenar el resultado en mult
+            xor bx,bx
+            ;multiplicar u por u1
+            mov al,u                            ;unidades num1 en al        
+            mov bl,u1                           ;unidades num2 en bl
+            mul bl                              ;multiplicar al por bl
+            mov registro,al                     ;almacenar decenas de resultado en registro
+            ;desenpaquetar registro
+            mov al,registro                     ;guardar registro en al
+            aam                                 ;ajustar ax para separar decenas y unidades 
+            mov cero,al                         ;guardar resultado de unidades en cero
+            mov auxiliar,ah                     ;guardar el resultado de decenas en auxiliar (carry)
+            ;multiplicar d por u1
+            mov al,d                            ;decenas num1 en al
+            mov bl,u1                           ;unidades num2 en bl
+            mul bl                              ;multiplicar al por bl
+            add al,auxiliar                     ;sumar auxiliar a al (sumar el carry anterior)
+            mov registro,al                     ;almacenar decenas de resultado en registro
+            ;desempaquetar registro 
+            mov al,registro                     ;guardar registro en al
+            aam                                 ;ajustar ax para separar decenas y unidades
+            mov uno,al                          ;guardar resultado de unidades en uno
+            mov auxiliar,ah                     ;guardar el resultado de decenas en auxiliar (carry)
+            ;multiplicar c por u1
+            mov al,c                            ;centenas num1 en al
+            mov bl,u1                           ;unidades num2 en bl
+            mul bl                              ;multiplicar al por bl
+            add al,auxiliar                     ;sumar auxiliar a al
+            mov registro,al                     ;almacenar decenas de resultado en registro
+            ;desempaquetar registro
+            mov al,registro                     ;guardar registro en al
+            aam                                 ;ajustar ax para separar decenas y unidades
+            mov dos,al                          ;guardar resultado de unidades en dos
+            mov tres,ah                         ;guardar el resultado de decenas en tres (carry)
+            ;multiplicar u con d1
+            mov al,u                            ;unidades num1 en al
+            mov bl,d1                           ;decenas num2 en bl
+            mul bl                              ;multiplicar al por bl
+            mov registro,al                     ;almacenar decenas de resultado en registro
+            ;desempaquetar registro
+            mov al,registro
+            aam                                 ;ajustar ax para separar decenas y unidades
+            mov cuatro,al                       ;guardar resultado de unidades en cuatro
+            mov auxiliar,ah                     ;guardar el resultado de decenas en auxiliar (carry)
+            ;multiplicar d con d1
+            mov al,d                            ;decenas num1 en al
+            mov bl,d1                           ;decenas num2 en bl
+            mul bl                              ;multiplicar al por bl
+            add al,auxiliar                     ;sumar auxiliar a al
+            mov registro,al                     ;almacenar decenas de resultado en registro
+            ;desempaquetar registro
+            mov al,registro                     ;guardar registro en al
+            aam                                 ;ajustar ax para separar decenas y unidades
+            mov cinco,al                        ;guardar resultado de unidades en cinco
+            mov auxiliar,ah                     ;guardar el resultado de decenas en auxiliar (carry)
+            ;multiplicar c con d1
+            mov al,c                            ;centenas num1 en al
+            mov bl,d1                           ;decenas num2 en bl
+            mul bl                              ;multiplicar al por bl
+            add al,auxiliar                     ;sumar auxiliar a al
+            mov registro,al                     ;almacenar decenas de resultado en registro
+            ;desempaquetar registro
+            mov al,registro                     ;guardar registro en al
+            aam                                 ;ajustar ax para separar decenas y unidades
+            mov seis,al                         ;guardar resultado de unidades en seis
+            mov siete,ah                        ;guardar el resultado de decenas en siete (carry)
+            ;multiplicar u con c1
+            mov al,u                            ;unidades num1 en al
+            mov bl,c1                           ;centenas num2 en bl
+            mul bl                              ;multiplicar al por bl
+            mov registro,al                     ;almacenar decenas de resultado en registro
+            ;desempaquetar registro
+            mov al,registro                     ;guardar registro en al
+            aam                                 ;ajustar ax para separar decenas y unidades
+            mov ocho,al                         ;guardar resultado de unidades en ocho
+            mov auxiliar,ah                     ;guardar el resultado de decenas en auxiliar (carry)
+            ;multiplicar d con c1
+            mov al,d                            ;decenas num1 en al
+            mov bl,c1                           ;centenas num2 en bl
+            mul bl                              ;multiplicar al por bl
+            add al,auxiliar                     ;sumar auxiliar a al
+            mov registro,al                     ;almacenar decenas de resultado en registro
+            ;desempaquetar registro
+            mov al,registro                     ;guardar registro en al
+            aam                                 ;ajustar ax para separar decenas y unidades
+            mov nueve,al                        ;guardar resultado de unidades en nueve
+            mov auxiliar,ah                     ;guardar el resultado de decenas en auxiliar (carry)
+            ;multiplicar c con c1
+            mov al,c                            ;centenas num1 en al
+            mov bl,c1                           ;centenas num2 en bl
+            mul bl                              ;multiplicar al por bl
+            add al,auxiliar                     ;sumar auxiliar a al
+            mov registro,al                     ;almacenar decenas de resultado en registro
+            ;desempaquetar registro
+            mov al,registro                     ;guardar registro en al
+            aam                                 ;ajustar ax para separar decenas y unidades
+            mov diez,al                         ;guardar resultado de unidades en diez
+            mov once,ah                         ;guardar el resultado de decenas en once (carry)
+            ;sumamos resultados
+            mov al,uno                          ;almacenar uno en al
+            add al,cuatro                       ;sumar al con cuatro
+            aam                                 ;separar decenas y unidades de resultado
+            mov uno,al                          ;decenas en uno (resultado final)
+            mov auxiliar,ah                     ;decenas en auxiliar (carry)
+            mov al,dos                          ;almacenar dos en al
+            add al,cinco                        ;sumar al con cinco
+            add al,ocho                         ;sumar al con ocho
+            add al,auxiliar                     ;sumar al con auxiliar (carry)
+            aam                                 ;separar decenas y unidades de resultado
+            mov dos,al                          ;centenas en dos (resultado final)
+            mov auxiliar,ah                     ;decenas en auxiliar (carry)
+            mov al,tres                         ;almacenar tres en al
+            add al,seis                         ;sumar al con seis
+            add al,nueve                        ;sumar al con nueve
+            add al,auxiliar                     ;sumar al con auxiliar (carry)
+            aam                                 ;separar decenas y unidades de resultado
+            mov tres,al                         ;decenas en tres (resultado final)
+            mov auxiliar,ah                     ;decenas en auxiliar (carry)
+            mov al,siete                        ;almacenar siete en al
+            add al,diez                         ;sumar al con diez
+            add al,auxiliar                     ;sumar al con auxiliar (carry)
+            aam                                 ;separar decenas y unidades de resultado
+            mov siete,al                        ;centenas en siete (resultado final)
+            mov auxiliar,ah                     ;decenas en auxiliar (carry)
+            mov al,once                         ;almacenar once en al
+            add al,auxiliar                     ;sumar al con auxiliar (carry)
+            mov once,al                         ;decenas en once (resultado final)
 
             ;imprimir resultado
             mov dx, offset RMult                ;mensaje de resultado multiplicacion
             pushA
             call PrintString
             mov ax, mult                        ;poner en ax el valor de mult
-            xor bx,bx                           ;limpiar bx
-            mov bh,ah                           ;separar resultado multiplicacion
-            mov ah,00h                          ;limpiar ah
-            mov dl,10                           ;poner en dl 10 para ajustar
-            div dl                              ;separar unidades
-            mov u,ah                            ;guardar unidades en u
-            mov ah,00h                          ;limpiar ah
-            div dl                              ;separar decenas y centenas
-            mov d,ah                            ;guardar decenas en d
-            mov ah,00h                          ;limpiar ah
-            div dl                              ;separar centenas y uMillar
-            mov c,ah                            ;guardar centenas en c
-            mov ah,00h                          ;limpiar ah
-            mov al,bh
-            div dl                              ;separar uNmillar
-            mov uMillar,ah                      ;guardar miles en uMillar
-            mov ah,00h                          ;limpiar ah
-            div dl                              ;separar dMillar y cMillar
-            mov dMillar,ah                      ;guardar dMillar
-            mov cMillar,al                      ;guardar cMillar
-            push word ptr cMillar               ;reservar espacio en la pila para cMillar
+            push word ptr once                  ;reservar espacio en la pila para cMillar
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            push word ptr dMillar               ;reservar espacio en la pila para dMillar
+            push word ptr siete                 ;reservar espacio en la pila para dMillar
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            push word ptr uMillar               ;reservar espacio en la pila para uMillar
+            push word ptr tres                  ;reservar espacio en la pila para uMillar
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            push word ptr c                     ;reservar espacio en la pila para c
+            push word ptr dos                   ;reservar espacio en la pila para centenas
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            push word ptr d                     ;reservar espacio en la pila para d
+            push word ptr uno                   ;reservar espacio en la pila para decenas
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            push word ptr u                     ;reservar espacio en la pila para u
+            push word ptr cero                  ;reservar espacio en la pila para unidades
             call PrintNum                       ;llamar a PrintNum para imprimir el resultado
             jmp short puenteSalir2              ;saltar a salir
 
