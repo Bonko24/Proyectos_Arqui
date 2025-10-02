@@ -41,7 +41,7 @@ Datos Segment
     ;numeros y variables
     num1        dw ?                            ;variables para almacenar los numeros ingresados
     num2        dw ?                            ;variables para almacenar los numeros ingresados
-    operando    db "*"                          ;variable para almacenar el operando ingresado
+    operando    db "/"                          ;variable para almacenar el operando ingresado
     ;var         db ?                           ;variable para almacenar la respuesta de si desea repetir
     cMillar     db ?                            ;variable para almacenar el digito de las centenas de millar
     dMillar     db ?                            ;variable para almacenar el digito de las decenas de millar
@@ -59,8 +59,7 @@ Datos Segment
     suma        dw ?
     resta       dw ?
     mult        dw ?
-    cociente    db ?
-    residuo     db ?
+    bufferDiv   db '     .    $'                   ;buffer para div '    '(entera) '.' (separador) '  ' (decimal)
 
     ;variables para multiplicacion
     registro    db ?
@@ -84,6 +83,7 @@ Datos EndS
 Codigo Segment
     Assume CS:Codigo, SS:Pila, DS:Datos
 
+    ;rutina para leer linea de comandos
     GetCommanderLine Proc Near                  ;obtiene lo ingresado en linea de comandos y lo pone en var linecommand
         LongLC  EQU  80h
         mov bp,sp
@@ -100,6 +100,55 @@ Codigo Segment
         rep movsb
         ret 2*2
     GetCommanderLine EndP
+
+    ;rutina para imprimir la parte entera del numero
+    ;recibe: bx = numero a convertir
+    ;retorna nada
+    Print_Num Proc Near
+        mov di, offset bufferDiv+4              ;puntero al final de la parte entera del buffer
+        mov cx,0                                ;contador
+        mov ax,bx                               ;numero a convertir
+        mov bx,10                               ;divisor para convertir a decimal
+
+        loopNum:
+            mov dx,0                            ;extender el dividendo a 32 bits (DX:AX)
+            div bx                              ;dividir ax entre bx, AX = cociente (parte entera), DX = residuo (parte decimal)
+            add dx,'0'                          ;convertir el digito a su caracter ASCII
+            mov [di],dl                         ;guardar el digito en el buffer
+            dec di                              ;decrementar el puntero al buffer
+            inc cx                              ;incrementar el contador
+            cmp ax,0                            ;comparar cociente con 0
+            jne loopNum                         ;si no, continuar
+        ret
+    Print_Num EndP
+
+    ;rutina para imprimir la parte fraccionaria del numero
+    ;recibe: bx = numero a convertir
+    ;retorna nada
+    Print_Dec Proc Near
+        mov di, offset bufferDiv+6              ;puntero al final de la parte decimal del buffer
+        mov ax,bx                               ;numero a convertir
+        mov bx,10                               ;divisor para convertir a decimal
+        mov cx,0                                ;contador
+
+        ;imprimir primer decimal
+        mov dx,0                                ;extender el dividendo a 32 bits (DX:AX)
+        div bx                                  
+        add dl,'0'                              
+        mov [di],dl                             ;guardar el digito en el buffer
+        mov ax,dx                               ;almacenar residuo para siguiente digito
+        inc di
+
+        ;imprimir segundo decimal
+        mov bx,10
+        mov dx,0
+        div bx
+        add dl,'0'
+        mov [di],dl
+
+        ret
+    Print_Dec EndP
+
 
 Inicio:
     ;inicializacion Datos Segment
@@ -149,9 +198,9 @@ puente:                                         ;puente para saltar ayuda en cas
             mov c,9                             ;variable para almacenar el digito de las centenas
             mov d,9                             ;variable para almacenar el digito de las decenas
             mov u,9                             ;variable para almacenar el digito de las unidades
-            mov c1,9                            ;variable para almacenar el digito de las centenas del num2
-            mov d1,9                            ;variable para almacenar el digito de las decenas del num2
-            mov u1,9                            ;variable para almacenar el digito de las unidades del num2
+            mov c1,1                            ;variable para almacenar el digito de las centenas del num2
+            mov d1,2                            ;variable para almacenar el digito de las decenas del num2
+            mov u1,3                            ;variable para almacenar el digito de las unidades del num2
             mov conver1,0                       ;variable para almacenar las decenas multiplicadas por 10
             mov conver2,0                       ;variable para almacenar las centenas multiplicadas por 100
             cmp cx,1                            ;comparar si cx es 1 (si ya se ingreso num1)
@@ -512,40 +561,39 @@ puenteSalir2:
     jmp puenteSalir                             ;saltar a salir
 
         divOp:
+            ;division obtener parte entera
             xor ax,ax                           ;limpiar ax
+            xor bx,bx                           ;limpiar bx
             mov ax,num1                         ;poner en ax el valor de num1
-            mov bx,num2                         ;poner en bx el valor de num2
-            cmp bx,0                            ;comparar si num2 es 0 para evitar division por 0
+            mov dx,0                            ;extender el dividendo a 32 bits (DX:AX)
+            mov cx,num2                         ;poner en cx el valor de num2
+            cmp cx,0                            ;comparar si num2 es 0 para evitar division por 0
             je error                            ;si es 0 saltar a error
-            div bl                              ;dividir ax entre bl, cociente en al, residuo en ah
-            mov cociente, al                    ;almacenar el cociente en cociente
-            mov residuo, ah                     ;almacenar el residuo en residuo
+            div cx                              ;dividir ax entre cx, AX = cociente (parte entera), DX = residuo (parte decimal)
+            
+            ;almacenar la parte entera en el buffer
+            mov bx,ax
+            call print_num
 
-            ;imprimir resultado
+            ;calcular la parte fraccionaria (2 decimales)
+            mov ax,dx                           ;mover el residuo de la division a ax 
+            mov cx,100                          ;multiplicar por 100 para obtener 2 decimales
+            mul cx                              ;ax * 100. resultado de 16*16 bits va a DX:AX
+            mov cx,num2                         ;poner en cx el valor de num2 (divisor)
+            div cx                              ;dividir DX:AX por cx
+                                                ;resultado: AX = parte decimal, DX = residuo
+            
+            ;almacenar la parte fraccionaria en el buffer
+            mov bx,ax
+            call print_dec
+
+            ;impresion resultado 
             mov dx, offset RDiv                 ;mensaje de resultado division
             pushA
             call PrintString
-            mov al,cociente                     ;poner en al el valor de cociente
-            aam                                 ;ajustar ax para separar decenas y unidades
-            mov u,al                            ;guardar unidades en u
-            mov al,ah                           ;pasar decenas a al
-            mov d,al                            ;guardar decenas en d
-            push word ptr d                     ;reservar espacio en la pila para d
-            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            push word ptr u                     ;reservar espacio en la pila para u
-            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            mov dx, offset RRes                 ;mensaje de resultado residuo
+            mov dx,offset bufferDiv
             pushA
             call PrintString
-            mov al,residuo                      ;poner en al el valor de residuo
-            aam                                 ;ajustar ax para separar decenas y unidades
-            mov u,al                            ;guardar unidades en u
-            mov al,ah                           ;pasar decenas a al
-            mov d,al                            ;guardar decenas en d
-            push word ptr d                     ;reservar espacio en la pila para d
-            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
-            push word ptr u                     ;reservar espacio en la pila para u
-            call PrintNum                       ;llamar a PrintNum para imprimir el resultado
             jmp short puenteSalir               ;saltar a salir
 
                 error:
