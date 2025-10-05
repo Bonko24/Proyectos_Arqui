@@ -137,18 +137,13 @@ Print_Dec Proc Near
     ;imprimir primer decimal
                        mov    dx,0                            ;extender el dividendo a 32 bits (DX:AX)
                        div    bx
-                       add    dl,'0'
-                       mov    [di],dl                         ;guardar el digito en el buffer
+                       add    al,'0'
+                       mov    [di],al                         ;guardar el digito en el buffer
                        mov    ax,dx                           ;almacenar residuo para siguiente digito
                        inc    di
-
     ;imprimir segundo decimal
-                       mov    bx,10
-                       mov    dx,0
-                       div    bx
-                       add    dl,'0'
-                       mov    [di],dl
-
+                       add    dl,'0'                          ;segundo decimal a ASCII
+                       mov    [di],dl                         ;guardar dìgito en el buffer
                        ret
 Print_Dec EndP
 
@@ -254,19 +249,19 @@ Comparaciones endp
                        pop    ds                              ;recuperar ds
 
     ; Verificar que la línea de comando es válida y clasificar números y operandos
-                       xor    bx,bx
-                       mov    bx, 82h                         ;para moverse en la línea de comandos dentor del psp
+                       mov    di, 82h                         ;para moverse en la línea de comandos dentro del psp
                        mov    cx,9                            ;longitud de la línea de comando
-    
+
+    ; Moverse caracter por caracter en la línea de comandos
     for:               
                        xor    ax,ax
-                       mov    bh,0
-                       mov    al,ES:[bx]
-                       push   cx
+                       mov    al,ES:[di]                      ;caracter que se va a leer
+                       push   cx                              ;guarda el contador para el loop principal
 
-    ; verificar si es número
+    ; verificar que todos los caracteres sean validos
                        mov    cx,15
                        mov    SI, cx
+    ; se mueve por la lista de characteres válidos
     chequeo:           
                        dec    SI
                        mov    ah, validos[SI]
@@ -278,6 +273,7 @@ Comparaciones endp
                        mov    ah,0
                        pop    cx
 
+    ;asigna valores de las variables
                        PUSH   CX
                        push   word ptr c
                        push   word ptr d
@@ -286,7 +282,7 @@ Comparaciones endp
                        push   word ptr c1
                        push   word ptr d1
                        push   word ptr u1
-                       call   Comparaciones
+                       call   Comparaciones                   ; coloca el valor en la variable correspondiente
                        POP    word ptr u1
                        POP    word ptr d1
                        POP    word ptr c1
@@ -296,10 +292,8 @@ Comparaciones endp
                        POP    word ptr c
                        POP    CX
     salida_for:        
-                       inc    bx
+                       inc    di
                        loop   for
-        
-        
 
                        mov    cx,0                            ;limpiar cx para realizar ajuste
     ajustar:           
@@ -677,7 +671,9 @@ Comparaciones endp
             
     ;almacenar la parte entera en el buffer
                        mov    bx,ax
+                       push   dx                              ; guardar el residuo en la pila
                        call   print_num
+                       pop    dx                              ;recuperar el residuo
 
     ;calcular la parte fraccionaria (2 decimales)
                        mov    ax,dx                           ;mover el residuo de la division a ax
@@ -689,7 +685,7 @@ Comparaciones endp
             
     ;almacenar la parte fraccionaria en el buffer
                        mov    bx,ax
-                       call   print_dec
+                       call   print_dec                       ;imprimir decimales
 
     ;impresion resultado
                        mov    dx, offset RDiv                 ;mensaje de resultado division
