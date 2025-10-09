@@ -1,4 +1,4 @@
-;Anthony Rodriguez 2021120181
+;Anthony Rodriguez 2021120181, Esteban Azofeifa 2023113603
 ;Calculadora basica que realiza suma, resta, multiplicacion y division de 2 numeros de 3 digitos
 ;Si el usuario no ingresa algo en linea de comandos se le mostrara un mensaje de ayuda
 ;Si el usuario ingresa la operacion en linea de comandos se ejecutara la calculadora normalmente
@@ -78,7 +78,7 @@ Datos Segment
     once        db  ?
 
     linecommand db  0FFh Dup (?)                                                                                                                                                        ;variable para almacenar la linea de comandos
-    ; mis variables
+
     validos     db  '0','1','2','3','4','5','6','7','8','9','+','-','*','/',' '
     
 Datos EndS
@@ -105,6 +105,14 @@ Codigo Segment
                    xor         dx,dx                                                                                                                 ;poner en 0 dh y dl para redireccionar cursor a 0,0
                    call        GotoXYP                                                                                                               ;redireccionar cursor a 0,0
 
+    ; Verificar que la línea de comandos tenga 9 caracteres
+                   mov         di, 80h
+                   xor         ax,ax
+                   mov         al, ES:[di]
+                   cmp         ax,10
+                   jne         puenteAyudas3
+    
+
     ;leer linea de comandos
                    push        ds
                    mov         ax,seg linecommand                                                                                                    ;poner en ax el segmento de la variable linecommand
@@ -113,15 +121,6 @@ Codigo Segment
                    push        ax
                    call        GetCommanderLine
     
-    ;mov bh, byte ptr DS:[LongLC]                ;poner en bh el numero de caracteres que tiene la linea de comandos (len)
-    ;cmp bh,0                                    ;compara para ver si es vacio
-    ;je puente
-                   jmp         short calculadora                                                                                                     ;en caso de no ser igual salta a calculadora
-
-    puente:                                                                                                                                          ;puente para saltar ayuda en caso de ingresar algo en linea de comandos
-                   pop         ds
-                   jmp         ayudas
-
     calculadora:   
     ;ajustar es / ds
                    mov         ax,ds                                                                                                                 ;guardar ds en ax
@@ -171,7 +170,8 @@ Codigo Segment
                    je          unidades2
                    jmp         short salida_for
                    
-
+    puenteAyudas3: 
+                   jmp         puenteAyudas2
     for_puente:    
                    jmp         short for
     centenas1:     

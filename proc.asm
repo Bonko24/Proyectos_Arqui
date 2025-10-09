@@ -2,7 +2,7 @@
 Procedimientos Segment
     ;aca proc debe ser far
 
-                        public InicializarDS, ClearScreenP, WhereXYP, GotoXYP, PrintCharColorP, PrintCharP, PrintNum, PrintString, ReadKey, WaitKeyP, GetCommanderLine, print_num, print_dec, ConversionNum, ArmarP, SUmaP, ImprimirResultadoSR, RestaP, MultiplicarP
+                        public InicializarDS, ClearScreenP, WhereXYP, GotoXYP, PrintCharColorP, PrintCharP, PrintNum, PrintString, ReadKey, WaitKeyP, GetCommanderLine, print_num, print_dec, ConversionNum, ArmarP, SUmaP, ImprimirResultadoSR, RestaP, MultiplicarP,AjustarNumP
 
     ;---------------------------------------------------------
     ;antes de llamar al proc en el programa principal
@@ -52,8 +52,8 @@ WhereXYP Proc Far
                         xor    bh,bh
                         mov    bp,sp
                         int    10h
-                        mov    6[bp],dh                                                                                                                                                                                                                                  ;poner en "fila" el valor de la fila retornado
-                        mov    4[bp],dl                                                                                                                                                                                                                                  ;poner en "columna" el valor de la columna retornado
+                        mov    6[bp],dh                                                                                                                                                                                                                                              ;poner en "fila" el valor de la fila retornado
+                        mov    4[bp],dl                                                                                                                                                                                                                                              ;poner en "columna" el valor de la columna retornado
                         RetF
 WhereXYP EndP
 
@@ -177,16 +177,16 @@ GetCommanderLine EndP
     ;retorna nada
 Print_Num Proc far
                         mov    bp, sp
-                        mov    di, 8[bp]                                                                                                                                                                                                                                 ;buffer de división
-                        mov    ax, 6[bp]                                                                                                                                                                                                                                 ;numero a convertir
-                        mov    bx,10                                                                                                                                                                                                                                     ;divisor para convertir a decimal
-                        xor    dx,dx                                                                                                                                                                                                                                     ;extender el dividendo a 32 bits (DX:AX)
-                        div    bx                                                                                                                                                                                                                                        ;dividir ax entre bx, AX = cociente (parte entera), DX = residuo (parte decimal)
-                        add    dx,'0'                                                                                                                                                                                                                                    ;convertir el digito a su caracter ASCII
-                        mov    [di],dl                                                                                                                                                                                                                                   ;guardar el digito en el buffer
-                        dec    di                                                                                                                                                                                                                                        ;decrementar el puntero al buffer
-                        mov    8[bp],di                                                                                                                                                                                                                                  ;buffer de división
-                        mov    6[bp], ax                                                                                                                                                                                                                                 ;numero a convertir
+                        mov    di, 8[bp]                                                                                                                                                                                                                                             ;buffer de división
+                        mov    ax, 6[bp]                                                                                                                                                                                                                                             ;numero a convertir
+                        mov    bx,10                                                                                                                                                                                                                                                 ;divisor para convertir a decimal
+                        xor    dx,dx                                                                                                                                                                                                                                                 ;extender el dividendo a 32 bits (DX:AX)
+                        div    bx                                                                                                                                                                                                                                                    ;dividir ax entre bx, AX = cociente (parte entera), DX = residuo (parte decimal)
+                        add    dx,'0'                                                                                                                                                                                                                                                ;convertir el digito a su caracter ASCII
+                        mov    [di],dl                                                                                                                                                                                                                                               ;guardar el digito en el buffer
+                        dec    di                                                                                                                                                                                                                                                    ;decrementar el puntero al buffer
+                        mov    8[bp],di                                                                                                                                                                                                                                              ;buffer de división
+                        mov    6[bp], ax                                                                                                                                                                                                                                             ;numero a convertir
 
                         xor    bp,bp
                         retf
@@ -198,19 +198,19 @@ Print_Num EndP
 Print_Dec Proc far
                         mov    bp,sp
                         mov    di,6[bp]
-                        mov    ax,4[bp]                                                                                                                                                                                                                                  ;numero a convertir
-                        mov    bx,10                                                                                                                                                                                                                                     ;divisor para convertir a decimal
+                        mov    ax,4[bp]                                                                                                                                                                                                                                              ;numero a convertir
+                        mov    bx,10                                                                                                                                                                                                                                                 ;divisor para convertir a decimal
 
     ;Primer decimal
-                        mov    dx,0                                                                                                                                                                                                                                      ;extender el dividendo a 32 bits (DX:AX)
+                        mov    dx,0                                                                                                                                                                                                                                                  ;extender el dividendo a 32 bits (DX:AX)
                         div    bx
                         add    al,'0'
-                        mov    [di],al                                                                                                                                                                                                                                   ;guardar el digito en el buffer
-                        mov    ax,dx                                                                                                                                                                                                                                     ;almacenar residuo para siguiente digito
+                        mov    [di],al                                                                                                                                                                                                                                               ;guardar el digito en el buffer
+                        mov    ax,dx                                                                                                                                                                                                                                                 ;almacenar residuo para siguiente digito
                         inc    di
     ;Segundo decimal
-                        add    dl,'0'                                                                                                                                                                                                                                    ;segundo decimal a ASCII
-                        mov    [di],dl                                                                                                                                                                                                                                   ;guardar dìgito en el buffer
+                        add    dl,'0'                                                                                                                                                                                                                                                ;segundo decimal a ASCII
+                        mov    [di],dl                                                                                                                                                                                                                                               ;guardar dìgito en el buffer
                         retf
 Print_Dec EndP
 
@@ -225,24 +225,24 @@ ConversionNum endp
 
 ArmarP Proc Far
                         mov    bp,sp
-                        xor    ax,ax                                                                                                                                                                                                                                     ;limpiar ax
-                        mov    ax,8[bp]                                                                                                                                                                                                                                  ;poner en ax el valor de conver1
-                        add    10[bp],ax                                                                                                                                                                                                                                 ;sumar conver1 a la suma
-                        mov    ax,6[bp]                                                                                                                                                                                                                                  ;poner en ax el valor de conver2
-                        add    10[bp],ax                                                                                                                                                                                                                                 ;sumar conver2 a suma
-                        mov    al,4[bp]                                                                                                                                                                                                                                  ;poner en al el valor de u
-                        add    10[bp],ax                                                                                                                                                                                                                                 ;sumar u a suma
+                        xor    ax,ax                                                                                                                                                                                                                                                 ;limpiar ax
+                        mov    ax,8[bp]                                                                                                                                                                                                                                              ;poner en ax el valor de conver1
+                        add    10[bp],ax                                                                                                                                                                                                                                             ;sumar conver1 a la suma
+                        mov    ax,6[bp]                                                                                                                                                                                                                                              ;poner en ax el valor de conver2
+                        add    10[bp],ax                                                                                                                                                                                                                                             ;sumar conver2 a suma
+                        mov    al,4[bp]                                                                                                                                                                                                                                              ;poner en al el valor de u
+                        add    10[bp],ax                                                                                                                                                                                                                                             ;sumar u a suma
                         xor    bp,bp
                         retf   6
 ArmarP EndP
 
 SumaP Proc Far
                         mov    bp, sp
-                        xor    ax,ax                                                                                                                                                                                                                                     ;limpiar ax
-                        mov    ax, 4[bp]                                                                                                                                                                                                                                 ;poner en ax el valor de num2
-                        add    8[bp], ax                                                                                                                                                                                                                                 ;sumar num1 a suma
-                        mov    ax, 6[bp]                                                                                                                                                                                                                                 ;poner en ax el valor de num1
-                        add    8[bp], ax                                                                                                                                                                                                                                 ;sumar num2 a suma
+                        xor    ax,ax                                                                                                                                                                                                                                                 ;limpiar ax
+                        mov    ax, 4[bp]                                                                                                                                                                                                                                             ;poner en ax el valor de num2
+                        add    8[bp], ax                                                                                                                                                                                                                                             ;sumar num1 a suma
+                        mov    ax, 6[bp]                                                                                                                                                                                                                                             ;poner en ax el valor de num1
+                        add    8[bp], ax                                                                                                                                                                                                                                             ;sumar num2 a suma
                         xor    bp,bp
                         retf   4
 SumaP EndP
@@ -250,34 +250,34 @@ SumaP EndP
     ; Imprimr resulado para suma y resta
 ImprimirResultadoSR Proc Far
                         mov    bp, sp
-                        xor    ax,ax                                                                                                                                                                                                                                     ;limpiar ax
-                        mov    ax, 12[bp]                                                                                                                                                                                                                                ;poner en ax el valor de suma
-                        mov    dl,10                                                                                                                                                                                                                                     ;poner en dl 10 para ajustar
-                        div    dl                                                                                                                                                                                                                                        ;separar unidades
-                        mov    4[bp],ah                                                                                                                                                                                                                                  ;guardar unidades en u
-                        mov    ah,00h                                                                                                                                                                                                                                    ;limpiar ah
-                        div    dl                                                                                                                                                                                                                                        ;separar decenas y centenas
-                        mov    6[bp],ah                                                                                                                                                                                                                                  ;guardar decenas en d
-                        mov    ah,00h                                                                                                                                                                                                                                    ;limpiar ah
-                        div    dl                                                                                                                                                                                                                                        ;separar centenas y uMillar
-                        mov    8[bp],ah                                                                                                                                                                                                                                  ;guardar centenas en c
-                        mov    10[bp],al                                                                                                                                                                                                                                 ;guardar miles en uMillar
-                        push   10[bp]                                                                                                                                                                                                                                    ;reservar espacio en la pila para uMillar
-                        call   PrintNum                                                                                                                                                                                                                                  ;llamar a PrintNum para imprimir el resultado
+                        xor    ax,ax                                                                                                                                                                                                                                                 ;limpiar ax
+                        mov    ax, 12[bp]                                                                                                                                                                                                                                            ;poner en ax el valor de suma
+                        mov    dl,10                                                                                                                                                                                                                                                 ;poner en dl 10 para ajustar
+                        div    dl                                                                                                                                                                                                                                                    ;separar unidades
+                        mov    4[bp],ah                                                                                                                                                                                                                                              ;guardar unidades en u
+                        mov    ah,00h                                                                                                                                                                                                                                                ;limpiar ah
+                        div    dl                                                                                                                                                                                                                                                    ;separar decenas y centenas
+                        mov    6[bp],ah                                                                                                                                                                                                                                              ;guardar decenas en d
+                        mov    ah,00h                                                                                                                                                                                                                                                ;limpiar ah
+                        div    dl                                                                                                                                                                                                                                                    ;separar centenas y uMillar
+                        mov    8[bp],ah                                                                                                                                                                                                                                              ;guardar centenas en c
+                        mov    10[bp],al                                                                                                                                                                                                                                             ;guardar miles en uMillar
+                        push   10[bp]                                                                                                                                                                                                                                                ;reservar espacio en la pila para uMillar
+                        call   PrintNum                                                                                                                                                                                                                                              ;llamar a PrintNum para imprimir el resultado
                         xor    bp,bp
                         mov    bp,sp
-                        push   8[bp]                                                                                                                                                                                                                                     ;reservar espacio en la pila para c
-                        call   PrintNum                                                                                                                                                                                                                                  ;llamar a PrintNum para imprimir el resultado
+                        push   8[bp]                                                                                                                                                                                                                                                 ;reservar espacio en la pila para c
+                        call   PrintNum                                                                                                                                                                                                                                              ;llamar a PrintNum para imprimir el resultado
 
                         xor    bp,bp
                         mov    bp,sp
-                        push   6[bp]                                                                                                                                                                                                                                     ;reservar espacio en la pila para d
-                        call   PrintNum                                                                                                                                                                                                                                  ;llamar a PrintNum para imprimir el resultado
+                        push   6[bp]                                                                                                                                                                                                                                                 ;reservar espacio en la pila para d
+                        call   PrintNum                                                                                                                                                                                                                                              ;llamar a PrintNum para imprimir el resultado
 
                         xor    bp,bp
                         mov    bp,sp
-                        push   4[bp]                                                                                                                                                                                                                                     ;reservar espacio en la pila para u
-                        call   PrintNum                                                                                                                                                                                                                                  ;llamar a PrintNum para imprimir el resultado
+                        push   4[bp]                                                                                                                                                                                                                                                 ;reservar espacio en la pila para u
+                        call   PrintNum                                                                                                                                                                                                                                              ;llamar a PrintNum para imprimir el resultado
                         xor    bp,bp
                         retf   10
 ImprimirResultadoSR EndP
@@ -285,10 +285,10 @@ ImprimirResultadoSR EndP
     ; Procedimeinto de resta de dos numeros de tres digitos
 RestaP Proc Far
                         mov    bp,sp
-                        xor    ax,ax                                                                                                                                                                                                                                     ;limpiar ax
-                        mov    ax, 6[bp]                                                                                                                                                                                                                                 ;poner en ax el valor de num1
-                        sub    ax, 4[bp]                                                                                                                                                                                                                                 ;restar num2 a ax
-                        mov    8[bp], ax                                                                                                                                                                                                                                 ;almacenar el resultado en resta
+                        xor    ax,ax                                                                                                                                                                                                                                                 ;limpiar ax
+                        mov    ax, 6[bp]                                                                                                                                                                                                                                             ;poner en ax el valor de num1
+                        sub    ax, 4[bp]                                                                                                                                                                                                                                             ;restar num2 a ax
+                        mov    8[bp], ax                                                                                                                                                                                                                                             ;almacenar el resultado en resta
                         xor    bp,bp
                         retf   4
 RestaP EndP
@@ -298,239 +298,255 @@ MultiplicarP Proc Far
                         mov    bp, sp
 
     ; Parámetros en pila:
-    ; 44[bp] - u
-    ; 42[bp] - d
-    ; 40[bp] - c
-    ; 38[bp] - u1
-    ; 36[bp] - d1
-    ; 34[bp] - c1
-    ; 32[bp] - registro
-    ; 30[bp] - auxiliar
-    ; 28[bp] - cero
-    ; 26[bp] - uno
-    ; 24[bp] - dos
-    ; 22[bp] - tres
-    ; 20[bp] - cuatro
-    ; 18[bp] - cinco
-    ; 16[bp] - seis
-    ; 14[bp] - siete
-    ; 12[bp] - ocho
-    ; 10[bp] - nueve
-    ; 8[bp]  - diez
-    ; 6[bp]  - once
+    ; 44[bp] = u
+    ; 42[bp] = d
+    ; 40[bp] = c
+    ; 38[bp] = u1
+    ; 36[bp] = d1
+    ; 34[bp] = c1
+    ; 32[bp] = registro
+    ; 30[bp] = auxiliar
+    ; 28[bp] = cero
+    ; 26[bp] = uno
+    ; 24[bp] = dos
+    ; 22[bp] = tres
+    ; 20[bp] = cuatro
+    ; 18[bp] = cinco
+    ; 16[bp] = seis
+    ; 14[bp] = siete
+    ; 12[bp] = ocho
+    ; 10[bp] = nueve
+    ; 8[bp]  = diez
+    ; 6[bp]  = once
 
-                        xor    ax, ax                                                                                                                                                                                                                                    ;limpiar ax
-                        xor    bx, bx                                                                                                                                                                                                                                    ;limpiar bx
+                        xor    ax, ax                                                                                                                                                                                                                                                ;limpiar ax
+                        xor    bx, bx                                                                                                                                                                                                                                                ;limpiar bx
     
     ;multiplicar u por u1
-                        mov    al, byte ptr 44[bp]                                                                                                                                                                                                                       ;unidades num1 en al
-                        mov    bl, byte ptr 38[bp]                                                                                                                                                                                                                       ;unidades num2 en bl
-                        mul    bl                                                                                                                                                                                                                                        ;multiplicar al por bl
-                        mov    di, 32[bp]                                                                                                                                                                                                                                ;almacenar decenas de resultado en registro
+                        mov    al, byte ptr 44[bp]                                                                                                                                                                                                                                   ;unidades num1 en al
+                        mov    bl, byte ptr 38[bp]                                                                                                                                                                                                                                   ;unidades num2 en bl
+                        mul    bl                                                                                                                                                                                                                                                    ;multiplicar al por bl
+                        mov    di, 32[bp]                                                                                                                                                                                                                                            ;almacenar decenas de resultado en registro
                         mov    [di], al
     
     ;desenpaquetar registro
-                        mov    al, [di]                                                                                                                                                                                                                                  ;guardar registro en al
-                        aam                                                                                                                                                                                                                                              ;ajustar ax para separar decenas y unidades
-                        mov    di, 28[bp]                                                                                                                                                                                                                                ;guardar resultado de unidades en cero
+                        mov    al, [di]                                                                                                                                                                                                                                              ;guardar registro en al
+                        aam                                                                                                                                                                                                                                                          ;ajustar ax para separar decenas y unidades
+                        mov    di, 28[bp]                                                                                                                                                                                                                                            ;guardar resultado de unidades en cero
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;guardar el resultado de decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;guardar el resultado de decenas en auxiliar (carry)
                         mov    [di], ah
     
     ;multiplicar d por u1
-                        mov    al, byte ptr 42[bp]                                                                                                                                                                                                                       ;decenas num1 en al
-                        mov    bl, byte ptr 38[bp]                                                                                                                                                                                                                       ;unidades num2 en bl
-                        mul    bl                                                                                                                                                                                                                                        ;multiplicar al por bl
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar auxiliar a al (sumar el carry anterior)
+                        mov    al, byte ptr 42[bp]                                                                                                                                                                                                                                   ;decenas num1 en al
+                        mov    bl, byte ptr 38[bp]                                                                                                                                                                                                                                   ;unidades num2 en bl
+                        mul    bl                                                                                                                                                                                                                                                    ;multiplicar al por bl
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar auxiliar a al (sumar el carry anterior)
                         add    al, [di]
-                        mov    di, 32[bp]                                                                                                                                                                                                                                ;almacenar decenas de resultado en registro
+                        mov    di, 32[bp]                                                                                                                                                                                                                                            ;almacenar decenas de resultado en registro
                         mov    [di], al
     
     ;desempaquetar registro
-                        mov    al, [di]                                                                                                                                                                                                                                  ;guardar registro en al
-                        aam                                                                                                                                                                                                                                              ;ajustar ax para separar decenas y unidades
-                        mov    di, 26[bp]                                                                                                                                                                                                                                ;guardar resultado de unidades en uno
+                        mov    al, [di]                                                                                                                                                                                                                                              ;guardar registro en al
+                        aam                                                                                                                                                                                                                                                          ;ajustar ax para separar decenas y unidades
+                        mov    di, 26[bp]                                                                                                                                                                                                                                            ;guardar resultado de unidades en uno
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;guardar el resultado de decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;guardar el resultado de decenas en auxiliar (carry)
                         mov    [di], ah
     
     ;multiplicar c por u1
-                        mov    al, byte ptr 40[bp]                                                                                                                                                                                                                       ;centenas num1 en al
-                        mov    bl, byte ptr 38[bp]                                                                                                                                                                                                                       ;unidades num2 en bl
-                        mul    bl                                                                                                                                                                                                                                        ;multiplicar al por bl
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar auxiliar a al
+                        mov    al, byte ptr 40[bp]                                                                                                                                                                                                                                   ;centenas num1 en al
+                        mov    bl, byte ptr 38[bp]                                                                                                                                                                                                                                   ;unidades num2 en bl
+                        mul    bl                                                                                                                                                                                                                                                    ;multiplicar al por bl
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar auxiliar a al
                         add    al, [di]
-                        mov    di, 32[bp]                                                                                                                                                                                                                                ;almacenar decenas de resultado en registro
+                        mov    di, 32[bp]                                                                                                                                                                                                                                            ;almacenar decenas de resultado en registro
                         mov    [di], al
     
     ;desempaquetar registro
-                        mov    al, [di]                                                                                                                                                                                                                                  ;guardar registro en al
-                        aam                                                                                                                                                                                                                                              ;ajustar ax para separar decenas y unidades
-                        mov    di, 24[bp]                                                                                                                                                                                                                                ;guardar resultado de unidades en dos
+                        mov    al, [di]                                                                                                                                                                                                                                              ;guardar registro en al
+                        aam                                                                                                                                                                                                                                                          ;ajustar ax para separar decenas y unidades
+                        mov    di, 24[bp]                                                                                                                                                                                                                                            ;guardar resultado de unidades en dos
                         mov    [di], al
-                        mov    di, 22[bp]                                                                                                                                                                                                                                ;guardar el resultado de decenas en tres (carry)
+                        mov    di, 22[bp]                                                                                                                                                                                                                                            ;guardar el resultado de decenas en tres (carry)
                         mov    [di], ah
     
     ;multiplicar u con d1
-                        mov    al, byte ptr 44[bp]                                                                                                                                                                                                                       ;unidades num1 en al
-                        mov    bl, byte ptr 36[bp]                                                                                                                                                                                                                       ;decenas num2 en bl
-                        mul    bl                                                                                                                                                                                                                                        ;multiplicar al por bl
-                        mov    di, 32[bp]                                                                                                                                                                                                                                ;almacenar decenas de resultado en registro
+                        mov    al, byte ptr 44[bp]                                                                                                                                                                                                                                   ;unidades num1 en al
+                        mov    bl, byte ptr 36[bp]                                                                                                                                                                                                                                   ;decenas num2 en bl
+                        mul    bl                                                                                                                                                                                                                                                    ;multiplicar al por bl
+                        mov    di, 32[bp]                                                                                                                                                                                                                                            ;almacenar decenas de resultado en registro
                         mov    [di], al
     
     ;desempaquetar registro
                         mov    al, [di]
-                        aam                                                                                                                                                                                                                                              ;ajustar ax para separar decenas y unidades
-                        mov    di, 20[bp]                                                                                                                                                                                                                                ;guardar resultado de unidades en cuatro
+                        aam                                                                                                                                                                                                                                                          ;ajustar ax para separar decenas y unidades
+                        mov    di, 20[bp]                                                                                                                                                                                                                                            ;guardar resultado de unidades en cuatro
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;guardar el resultado de decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;guardar el resultado de decenas en auxiliar (carry)
                         mov    [di], ah
     
     ;multiplicar d con d1
-                        mov    al, byte ptr 42[bp]                                                                                                                                                                                                                       ;decenas num1 en al
-                        mov    bl, byte ptr 36[bp]                                                                                                                                                                                                                       ;decenas num2 en bl
-                        mul    bl                                                                                                                                                                                                                                        ;multiplicar al por bl
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar auxiliar a al
+                        mov    al, byte ptr 42[bp]                                                                                                                                                                                                                                   ;decenas num1 en al
+                        mov    bl, byte ptr 36[bp]                                                                                                                                                                                                                                   ;decenas num2 en bl
+                        mul    bl                                                                                                                                                                                                                                                    ;multiplicar al por bl
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar auxiliar a al
                         add    al, [di]
-                        mov    di, 32[bp]                                                                                                                                                                                                                                ;almacenar decenas de resultado en registro
+                        mov    di, 32[bp]                                                                                                                                                                                                                                            ;almacenar decenas de resultado en registro
                         mov    [di], al
     
     ;desempaquetar registro
-                        mov    al, [di]                                                                                                                                                                                                                                  ;guardar registro en al
-                        aam                                                                                                                                                                                                                                              ;ajustar ax para separar decenas y unidades
-                        mov    di, 18[bp]                                                                                                                                                                                                                                ;guardar resultado de unidades en cinco
+                        mov    al, [di]                                                                                                                                                                                                                                              ;guardar registro en al
+                        aam                                                                                                                                                                                                                                                          ;ajustar ax para separar decenas y unidades
+                        mov    di, 18[bp]                                                                                                                                                                                                                                            ;guardar resultado de unidades en cinco
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;guardar el resultado de decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;guardar el resultado de decenas en auxiliar (carry)
                         mov    [di], ah
     
     ;multiplicar c con d1
-                        mov    al, byte ptr 40[bp]                                                                                                                                                                                                                       ;centenas num1 en al
-                        mov    bl, byte ptr 36[bp]                                                                                                                                                                                                                       ;decenas num2 en bl
-                        mul    bl                                                                                                                                                                                                                                        ;multiplicar al por bl
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar auxiliar a al
+                        mov    al, byte ptr 40[bp]                                                                                                                                                                                                                                   ;centenas num1 en al
+                        mov    bl, byte ptr 36[bp]                                                                                                                                                                                                                                   ;decenas num2 en bl
+                        mul    bl                                                                                                                                                                                                                                                    ;multiplicar al por bl
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar auxiliar a al
                         add    al, [di]
-                        mov    di, 32[bp]                                                                                                                                                                                                                                ;almacenar decenas de resultado en registro
+                        mov    di, 32[bp]                                                                                                                                                                                                                                            ;almacenar decenas de resultado en registro
                         mov    [di], al
     
     ;desempaquetar registro
-                        mov    al, [di]                                                                                                                                                                                                                                  ;guardar registro en al
-                        aam                                                                                                                                                                                                                                              ;ajustar ax para separar decenas y unidades
-                        mov    di, 16[bp]                                                                                                                                                                                                                                ;guardar resultado de unidades en seis
+                        mov    al, [di]                                                                                                                                                                                                                                              ;guardar registro en al
+                        aam                                                                                                                                                                                                                                                          ;ajustar ax para separar decenas y unidades
+                        mov    di, 16[bp]                                                                                                                                                                                                                                            ;guardar resultado de unidades en seis
                         mov    [di], al
-                        mov    di, 14[bp]                                                                                                                                                                                                                                ;guardar el resultado de decenas en siete (carry)
+                        mov    di, 14[bp]                                                                                                                                                                                                                                            ;guardar el resultado de decenas en siete (carry)
                         mov    [di], ah
     
     ;multiplicar u con c1
-                        mov    al, byte ptr 44[bp]                                                                                                                                                                                                                       ;unidades num1 en al
-                        mov    bl, byte ptr 34[bp]                                                                                                                                                                                                                       ;centenas num2 en bl
-                        mul    bl                                                                                                                                                                                                                                        ;multiplicar al por bl
-                        mov    di, 32[bp]                                                                                                                                                                                                                                ;almacenar decenas de resultado en registro
+                        mov    al, byte ptr 44[bp]                                                                                                                                                                                                                                   ;unidades num1 en al
+                        mov    bl, byte ptr 34[bp]                                                                                                                                                                                                                                   ;centenas num2 en bl
+                        mul    bl                                                                                                                                                                                                                                                    ;multiplicar al por bl
+                        mov    di, 32[bp]                                                                                                                                                                                                                                            ;almacenar decenas de resultado en registro
                         mov    [di], al
     
     ;desempaquetar registro
-                        mov    al, [di]                                                                                                                                                                                                                                  ;guardar registro en al
-                        aam                                                                                                                                                                                                                                              ;ajustar ax para separar decenas y unidades
-                        mov    di, 12[bp]                                                                                                                                                                                                                                ;guardar resultado de unidades en ocho
+                        mov    al, [di]                                                                                                                                                                                                                                              ;guardar registro en al
+                        aam                                                                                                                                                                                                                                                          ;ajustar ax para separar decenas y unidades
+                        mov    di, 12[bp]                                                                                                                                                                                                                                            ;guardar resultado de unidades en ocho
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;guardar el resultado de decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;guardar el resultado de decenas en auxiliar (carry)
                         mov    [di], ah
     
     ;multiplicar d con c1
-                        mov    al, byte ptr 42[bp]                                                                                                                                                                                                                       ;decenas num1 en al
-                        mov    bl, byte ptr 34[bp]                                                                                                                                                                                                                       ;centenas num2 en bl
-                        mul    bl                                                                                                                                                                                                                                        ;multiplicar al por bl
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar auxiliar a al
+                        mov    al, byte ptr 42[bp]                                                                                                                                                                                                                                   ;decenas num1 en al
+                        mov    bl, byte ptr 34[bp]                                                                                                                                                                                                                                   ;centenas num2 en bl
+                        mul    bl                                                                                                                                                                                                                                                    ;multiplicar al por bl
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar auxiliar a al
                         add    al, [di]
-                        mov    di, 32[bp]                                                                                                                                                                                                                                ;almacenar decenas de resultado en registro
+                        mov    di, 32[bp]                                                                                                                                                                                                                                            ;almacenar decenas de resultado en registro
                         mov    [di], al
     
     ;desempaquetar registro
-                        mov    al, [di]                                                                                                                                                                                                                                  ;guardar registro en al
-                        aam                                                                                                                                                                                                                                              ;ajustar ax para separar decenas y unidades
-                        mov    di, 10[bp]                                                                                                                                                                                                                                ;guardar resultado de unidades en nueve
+                        mov    al, [di]                                                                                                                                                                                                                                              ;guardar registro en al
+                        aam                                                                                                                                                                                                                                                          ;ajustar ax para separar decenas y unidades
+                        mov    di, 10[bp]                                                                                                                                                                                                                                            ;guardar resultado de unidades en nueve
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;guardar el resultado de decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;guardar el resultado de decenas en auxiliar (carry)
                         mov    [di], ah
     
     ;multiplicar c con c1
-                        mov    al, byte ptr 40[bp]                                                                                                                                                                                                                       ;centenas num1 en al
-                        mov    bl, byte ptr 34[bp]                                                                                                                                                                                                                       ;centenas num2 en bl
-                        mul    bl                                                                                                                                                                                                                                        ;multiplicar al por bl
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar auxiliar a al
+                        mov    al, byte ptr 40[bp]                                                                                                                                                                                                                                   ;centenas num1 en al
+                        mov    bl, byte ptr 34[bp]                                                                                                                                                                                                                                   ;centenas num2 en bl
+                        mul    bl                                                                                                                                                                                                                                                    ;multiplicar al por bl
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar auxiliar a al
                         add    al, [di]
-                        mov    di, 32[bp]                                                                                                                                                                                                                                ;almacenar decenas de resultado en registro
+                        mov    di, 32[bp]                                                                                                                                                                                                                                            ;almacenar decenas de resultado en registro
                         mov    [di], al
     
     ;desempaquetar registro
-                        mov    al, [di]                                                                                                                                                                                                                                  ;guardar registro en al
-                        aam                                                                                                                                                                                                                                              ;ajustar ax para separar decenas y unidades
-                        mov    di, 8[bp]                                                                                                                                                                                                                                 ;guardar resultado de unidades en diez
+                        mov    al, [di]                                                                                                                                                                                                                                              ;guardar registro en al
+                        aam                                                                                                                                                                                                                                                          ;ajustar ax para separar decenas y unidades
+                        mov    di, 8[bp]                                                                                                                                                                                                                                             ;guardar resultado de unidades en diez
                         mov    [di], al
-                        mov    di, 6[bp]                                                                                                                                                                                                                                 ;guardar el resultado de decenas en once (carry)
+                        mov    di, 6[bp]                                                                                                                                                                                                                                             ;guardar el resultado de decenas en once (carry)
                         mov    [di], ah
     
     ;sumamos resultados
-                        mov    di, 26[bp]                                                                                                                                                                                                                                ;almacenar uno en al
+                        mov    di, 26[bp]                                                                                                                                                                                                                                            ;almacenar uno en al
                         mov    al, [di]
-                        mov    di, 20[bp]                                                                                                                                                                                                                                ;sumar al con cuatro
+                        mov    di, 20[bp]                                                                                                                                                                                                                                            ;sumar al con cuatro
                         add    al, [di]
-                        aam                                                                                                                                                                                                                                              ;separar decenas y unidades de resultado
-                        mov    di, 26[bp]                                                                                                                                                                                                                                ;decenas en uno (resultado final)
+                        aam                                                                                                                                                                                                                                                          ;separar decenas y unidades de resultado
+                        mov    di, 26[bp]                                                                                                                                                                                                                                            ;decenas en uno (resultado final)
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;decenas en auxiliar (carry)
                         mov    [di], ah
     
-                        mov    di, 24[bp]                                                                                                                                                                                                                                ;almacenar dos en al
+                        mov    di, 24[bp]                                                                                                                                                                                                                                            ;almacenar dos en al
                         mov    al, [di]
-                        mov    di, 18[bp]                                                                                                                                                                                                                                ;sumar al con cinco
+                        mov    di, 18[bp]                                                                                                                                                                                                                                            ;sumar al con cinco
                         add    al, [di]
-                        mov    di, 12[bp]                                                                                                                                                                                                                                ;sumar al con ocho
+                        mov    di, 12[bp]                                                                                                                                                                                                                                            ;sumar al con ocho
                         add    al, [di]
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar al con auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar al con auxiliar (carry)
                         add    al, [di]
-                        aam                                                                                                                                                                                                                                              ;separar decenas y unidades de resultado
-                        mov    di, 24[bp]                                                                                                                                                                                                                                ;centenas en dos (resultado final)
+                        aam                                                                                                                                                                                                                                                          ;separar decenas y unidades de resultado
+                        mov    di, 24[bp]                                                                                                                                                                                                                                            ;centenas en dos (resultado final)
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;decenas en auxiliar (carry)
                         mov    [di], ah
     
-                        mov    di, 22[bp]                                                                                                                                                                                                                                ;almacenar tres en al
+                        mov    di, 22[bp]                                                                                                                                                                                                                                            ;almacenar tres en al
                         mov    al, [di]
-                        mov    di, 16[bp]                                                                                                                                                                                                                                ;sumar al con seis
+                        mov    di, 16[bp]                                                                                                                                                                                                                                            ;sumar al con seis
                         add    al, [di]
-                        mov    di, 10[bp]                                                                                                                                                                                                                                ;sumar al con nueve
+                        mov    di, 10[bp]                                                                                                                                                                                                                                            ;sumar al con nueve
                         add    al, [di]
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar al con auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar al con auxiliar (carry)
                         add    al, [di]
-                        aam                                                                                                                                                                                                                                              ;separar decenas y unidades de resultado
-                        mov    di, 22[bp]                                                                                                                                                                                                                                ;decenas en tres (resultado final)
+                        aam                                                                                                                                                                                                                                                          ;separar decenas y unidades de resultado
+                        mov    di, 22[bp]                                                                                                                                                                                                                                            ;decenas en tres (resultado final)
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;decenas en auxiliar (carry)
                         mov    [di], ah
     
-                        mov    di, 14[bp]                                                                                                                                                                                                                                ;almacenar siete en al
+                        mov    di, 14[bp]                                                                                                                                                                                                                                            ;almacenar siete en al
                         mov    al, [di]
-                        mov    di, 8[bp]                                                                                                                                                                                                                                 ;sumar al con diez
+                        mov    di, 8[bp]                                                                                                                                                                                                                                             ;sumar al con diez
                         add    al, [di]
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar al con auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar al con auxiliar (carry)
                         add    al, [di]
-                        aam                                                                                                                                                                                                                                              ;separar decenas y unidades de resultado
-                        mov    di, 14[bp]                                                                                                                                                                                                                                ;centenas en siete (resultado final)
+                        aam                                                                                                                                                                                                                                                          ;separar decenas y unidades de resultado
+                        mov    di, 14[bp]                                                                                                                                                                                                                                            ;centenas en siete (resultado final)
                         mov    [di], al
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;decenas en auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;decenas en auxiliar (carry)
                         mov    [di], ah
     
-                        mov    di, 6[bp]                                                                                                                                                                                                                                 ;almacenar once en al
+                        mov    di, 6[bp]                                                                                                                                                                                                                                             ;almacenar once en al
                         mov    al, [di]
-                        mov    di, 30[bp]                                                                                                                                                                                                                                ;sumar al con auxiliar (carry)
+                        mov    di, 30[bp]                                                                                                                                                                                                                                            ;sumar al con auxiliar (carry)
                         add    al, [di]
-                        mov    di, 6[bp]                                                                                                                                                                                                                                 ;decenas en once (resultado final)
+                        mov    di, 6[bp]                                                                                                                                                                                                                                             ;decenas en once (resultado final)
                         mov    [di], al
 
                         pop    bp
                         xor    bp, bp
                         retf   40
 MultiplicarP EndP
+
+    ; Ejemplo de uso
+    ; push   conver1
+    ; push   word ptr c
+    ; push   word ptr 100d
+    ; call   AjustarNumP
+AjustarNumP Proc Far
+                        mov    bp,sp
+                        xor    ax,ax                                                                                                                                                                                                                                                 ; limpiar ax
+                        mov    al,byte ptr 6[bp]                                                                                                                                                                                                                                     ; poner en al el valor de var
+                        mov    bl,byte ptr 4[bp]                                                                                                                                                                                                                                     ; poner en bl el factor
+                        mul    bl                                                                                                                                                                                                                                                    ; multiplicar al por factor
+                        mov    8[bp],ax                                                                                                                                                                                                                                              ; guardar el resultado de AX en destino
+                        xor    bp,bp
+                        retf   6
+AjustarNumP EndP
 
 Procedimientos EndS
     End
