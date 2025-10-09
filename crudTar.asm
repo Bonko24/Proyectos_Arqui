@@ -2,7 +2,7 @@
 ;Programa basico de un CRUD de tarjetas de empleados
 
 ;includes
-include macros.asm
+include macroPP.asm
 ;procedimientos
 extrn ClearScreenP:Far, GotoXYP:Far, WaitKeyP:Far, print_string:Far, input_string:Far, write_comma:Far, write_backSlash:Far
 
@@ -27,7 +27,7 @@ Datos Segment
     msg_email       db 13,10,'Email: (35 char max)  $'
     msg_pregunta    db 13,10,13,10,'Ingresar otro? (s/n):  $'
     msg_error       db 13,10,'Error en archivo...$'
-    msg_no_archivo  db 13,10,'Archivo no encontrado o vacio...$'
+    msg_no_archivo  db 13,10,'Problema con el archivo...$'
     msg_listando    db 13,10,'--- LISTA DE EMPLEADOS ---',13,10,'$'
     msg_guardado    db 13,10,'Empleado guardado...$'
     msg_modificado  db 13,10,'Empleado modificado...$'
@@ -48,10 +48,15 @@ Datos Segment
     temp_file      db 'temp.txt', 0
     rename_file    db 'temp.txt',0,'empleado.txt',0
     handle         dw ?
+    handle_temp    dw ?
+    len_archivo    dw ?
+    out_ptr        dw ?
 
     cont_empleados dw ?
-    buffer_lectura db 256 DUP(0)
-    cr_lf          db 13,10,'$'                 ;salto de linea DOS
+    cedula_buscar  db 41, 0, 41 DUP(0)
+    buffer_lectura db 4096 DUP(0)
+    out_buffer     db 4096 DUP(0)
+    cr_lf          db 13,10,'$'              ; salto de linea DOS
     coma           db ','
     separacion     db '/'
 Datos EndS
@@ -76,14 +81,14 @@ Inicio:
         mov cont_empleados,0
 
         ;limpiar pantalla y redireccionar cursor
-            mov bh,0fh                              ;da color blanco a la pantalla
-            xor cx,cx                               ;pone en 0 ch y cl
-            mov dh,24                               ;fila inferior
-            mov dl,79                               ;columna inferior
+            mov bh,0fh                      ; da color blanco a la pantalla
+            xor cx,cx                       ; pone en 0 ch y cl
+            mov dh,24                       ; fila inferior
+            mov dl,79                       ; columna inferior
             pushA                     
-            call ClearScreenP                       ;limpiar pantalla
-            xor dx,dx                               ;poner en 0 dh y dl para redireccionar cursor a 0,0
-            call GotoXYP                            ;redireccionar cursor a 0,0
+            call ClearScreenP               ; limpiar pantalla
+            xor dx,dx                       ; poner en 0 dh y dl para redireccionar cursor a 0,0
+            call GotoXYP                    ; redireccionar cursor a 0,0
 
         ;procesar opcion
         mov al, [buf_opcion + 2]
@@ -91,6 +96,8 @@ Inicio:
         je agregar_empleado
         cmp al, '2'
         je puenteListar
+        ;cmp al, '4'
+        ;je puenteEliminar
         cmp al, '5'
         je puenteSalir
         jmp menu_principal
@@ -148,6 +155,8 @@ Inicio:
 ;puentes
 puenteListar:
     jmp listar_empleados
+;puenteEliminar:
+;    jmp puenteEliminar1
 puenteSalir:
     jmp salir_programa
 
@@ -163,7 +172,7 @@ puenteSalir:
     ;mover puntero al final del archivo
     mover_al_final:
         mov bx, handle
-        mov ax, 4202h        ; Mover al final (EOF)
+        mov ax, 4202h               ; Mover al final (EOF)
         xor cx, cx
         xor dx, dx
         int 21h
@@ -227,14 +236,14 @@ puenteErrorArchivo:
 
 
             ;limpiar pantalla y redireccionar cursor
-            mov bh,0fh                              ;da color blanco a la pantalla
-            xor cx,cx                               ;pone en 0 ch y cl
-            mov dh,24                               ;fila inferior
-            mov dl,79                               ;columna inferior
+            mov bh,0fh                  ; da color blanco a la pantalla
+            xor cx,cx                   ; pone en 0 ch y cl
+            mov dh,24                   ; fila inferior
+            mov dl,79                   ; columna inferior
             pushA                     
-            call ClearScreenP                       ;limpiar pantalla
-            xor dx,dx                               ;poner en 0 dh y dl para redireccionar cursor a 0,0
-            call GotoXYP                            ;redireccionar cursor a 0,0
+            call ClearScreenP           ; limpiar pantalla
+            xor dx,dx                   ; poner en 0 dh y dl para redireccionar cursor a 0,0
+            call GotoXYP                ; redireccionar cursor a 0,0
 
         ; ¿Agregar otro?
         agregar_otro:
@@ -258,8 +267,11 @@ puenteErrorArchivo:
         int 21h
         mov al, [buf_opcion + 2]
         cmp al,'5'
-        je salir_programa
+        je puenteSalir1
         jmp menu_principal
+
+;puenteEliminar1:
+;    jmp eliminar_empleado
 
     ;listar empleados
     listar_empleados:
@@ -271,18 +283,18 @@ puenteErrorArchivo:
         lea dx, filename
         mov ax, 3D00h
         int 21h
-        jc no_existe
+        jc puente_no_existe
 
         mov handle, ax
 
     leer_bucle:
         mov bx, handle
-        mov cx, 255
+        mov cx, 4096
         lea dx, buffer_lectura
-        mov ah, 3Fh          ; Leer desde archivo
+        mov ah, 3Fh                 ; Leer desde archivo
         int 21h
 
-        cmp ax, 0            ; ¿Fin del archivo?
+        cmp ax, 0                   ; ¿Fin del archivo?
         je fin_lectura
 
         ; Imprimir los ax bytes leídos
@@ -293,7 +305,7 @@ puenteErrorArchivo:
         mov dl,al 
         cmp dl,'/'
         je enter
-        mov ah, 02h          ; Imprimir carácter
+        mov ah, 02h                 ; Imprimir carácter
         int 21h
         loop imprimir_bucle
 
@@ -310,6 +322,200 @@ puenteErrorArchivo:
         mov ah, 3Eh
         int 21h
         jmp cerrar_archivo
+
+puenteSalir1:
+    jmp salir_programa
+puente_no_existe:
+    jmp no_existe
+
+    ;eliminar empleado
+    ;eliminar_empleado:
+    ;    ; Leer datos
+    ;    lea dx, msg_cedula
+    ;    push dx
+    ;    call print_string
+    ;    lea dx, cedula_buscar
+    ;    push dx
+    ;    call input_string
+;
+    ;    ; Abrir archivo original en modo solo lectura
+    ;    lea dx, filename
+    ;    mov ax, 3D00h
+    ;    int 21h
+    ;    jc puente_no_existe
+    ;    mov handle, ax
+;
+    ;    ; Leer todo el archivo y copiar a buffer
+    ;    mov bx, handle
+    ;    mov cx, 4096
+    ;    lea dx, buffer_lectura
+    ;    mov ah, 3Fh
+    ;    int 21h
+    ;    jc puente_no_existe
+    ;    mov len_archivo, ax
+;
+    ;    ; Cerrar archivo original
+    ;    mov bx, handle
+    ;    mov ah, 3Eh
+    ;    int 21h
+;
+    ;    ; Crear archivo temporal
+    ;    lea dx, temp_file
+    ;    mov ah, 3Ch
+    ;    mov cx, 0
+    ;    int 21h
+    ;    jc puente_no_existe
+    ;    mov handle_temp, ax
+;
+    ;    ; Procesar buffer
+    ;    lea si, buffer_lectura
+    ;    mov di,si
+    ;    add di,len_archivo          ;di apunta al final del buffer  
+    ;    xor bx,bx                   ;bx es el indice del buffer
+;
+    ;    procesar_bucle: 
+    ;        cmp si,di
+    ;        jge puente_fin_procesar
+;
+    ;        ;buscar fin del registro (o '/')
+    ;        mov cx,si
+    ;        mov ax,si
+    ;        sub ax,bx               ;ax = longitud del registro actual sin verificar
+;
+    ;        buscar_barra:
+    ;            cmp si,di
+    ;            jge sin_barra
+    ;            cmp byte ptr [si],'/'
+    ;            je encontrado_barra
+    ;            inc si
+    ;            jmp buscar_barra
+;
+    ;            sin_barra:
+    ;                ;ultimo registro sin barra
+    ;                mov si,di
+;
+    ;            encontrado_barra:
+    ;            ;ahora [bx .. si-1] es el registro completo
+    ;            ;extraer cedula del registro (buscar coma)
+    ;            push si
+    ;            push di
+    ;            mov di,bx
+    ;            xor cx,cx            ;cx es el indice dentro del registro actual (contador de comas)
+;
+    ;            buscar_coma:
+    ;                cmp di,si
+    ;                jge no_encontrada
+    ;                cmp byte ptr [di],','
+    ;                jge no_es_coma
+    ;                inc cx
+    ;                cmp cx,2
+    ;                je cedula_inicio
+;
+    ;                no_es_coma:
+    ;                    inc di
+    ;                    jmp buscar_coma
+;
+    ;                    cedula_inicio:
+    ;                        inc di  ;di apuntando al inicio de la cedula
+    ;                        push di 
+    ;                        lea si, cedula_buscar
+    ;                        xor cx,cx
+;
+    ;                        comparar_cedula:
+    ;                            ; comparar byte a byte hasta ',' o fin de registro
+    ;                            cmp di,[bp-2]
+    ;                            cmp byte ptr [di],','
+    ;                            je cedula_fin_barra
+    ;                            cmp byte ptr [si],0
+    ;                            je ced_fin_cero
+    ;                            mov al,[di]
+    ;                            cmp al,[si]
+    ;                            jne cedula_distinta
+    ;                            inc di
+    ;                            inc si
+    ;                            jmp comparar_cedula
+    ;                        
+    ;    puente_fin_procesar:
+    ;        jmp fin_procesar
+;
+    ;                    cedula_fin_barra:
+    ;                        cmp byte ptr [si],0
+    ;                        jne cedula_distinta
+    ;                        jmp cedula_coincide
+;
+    ;                    ced_fin_cero:
+    ;                        cmp byte ptr [di],','
+    ;                        jne cedula_distinta
+    ;                        jmp cedula_coincide
+;
+    ;                    cedula_distinta:
+    ;                        pop di          ;limpiar pila
+    ;                        jmp copiar_registro
+;
+    ;                    cedula_coincide:
+    ;                        pop di          ;limpiar pila
+    ;                        ;coincide -> no copiar registro
+    ;                        pop di
+    ;                        pop si
+    ;                        inc si         ;si apunta al inicio del siguiente registro (saltar la '/')
+    ;                        mov bx,si
+    ;                        jmp procesar_bucle
+;
+    ;                no_encontrada:
+    ;                    ;no se encontro la cedula en el registro
+    ;                    pop di
+    ;                    pop si
+;
+    ;        copiar_registro:
+    ;            pop di
+    ;            pop si
+    ;            ;copiar registro [bx .. si] al out buffer
+    ;            lea dx, out_buffer
+    ;            add di, out_ptr
+    ;            mov cx, si
+    ;            sub cx, bx
+    ;            lea si,buffer_lectura
+    ;            add si,bx
+    ;            rep movsb
+    ;            mov out_ptr,di
+    ;            sub out_ptr,offset out_buffer
+;
+    ;            ;agregar barra al final
+    ;            cmp si,len_archivo
+    ;            je no_copiar_barra
+    ;            mov al,'/'
+    ;            mov [di],al
+    ;            inc out_buffer
+    ;            no_copiar_barra:
+    ;            inc si
+    ;            mov bx,si
+    ;            jmp procesar_bucle
+;
+    ;    fin_procesar:
+    ;        ;escribir out_ptr en archivo temporal
+    ;        mov cx, out_ptr
+    ;        cmp cx,0
+    ;        je cerrar_temp
+    ;        mov bx, handle_temp
+    ;        lea dx, out_buffer
+    ;        mov ah, 40h
+    ;        int 21h
+    ;        jc no_existe
+    ;    
+    ;    cerrar_temp:
+    ;        mov bx, handle_temp
+    ;        mov ah, 3Eh
+    ;        int 21h
+;
+    ;        ;borrar archivo original y renombrar temporal
+    ;        lea dx, filename
+    ;        mov ah,41h
+    ;        int 21h
+;
+    ;        lea dx, temp_file
+    ;        mov di, offset filename
+    ;        mov ah,56h              ;renombrar archivo temp a empleado 
+    ;        int 21h
 
     no_existe:
         lea dx, msg_no_archivo
