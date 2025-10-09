@@ -13,7 +13,7 @@
  
 ;llamadas a procedimientos en proc.asm
 include macros.asm
-extrn InicializarDS:Far, ClearScreenP:Far, WhereXYP:Far, GotoXYP:Far, PrintCharColorP:Far, PrintCharP:Far, PrintNum:Far, PrintString:Far, ReadKey:Far,WaitKeyP:Far
+extrn InicializarDS:Far, ClearScreenP:Far, WhereXYP:Far, GotoXYP:Far, PrintCharColorP:Far, PrintCharP:Far, PrintNum:Far, PrintString:Far, ReadKey:Far,WaitKeyP:Far,GetCommanderLine:Far, Print_Num:Far, Print_Dec:far
 
 Pila Segment
          db 64 Dup ('?')
@@ -85,68 +85,6 @@ Datos EndS
 
 Codigo Segment
                        Assume CS:Codigo, SS:Pila, DS:Datos
-
-    ;rutina para leer linea de comandos
-GetCommanderLine Proc Near                                    ;obtiene lo ingresado en linea de comandos y lo pone en var linecommand
-    LongLC             EQU    80h
-                       mov    bp,sp
-                       mov    ax,es
-                       mov    ds,ax
-                       mov    di,2[bp]
-                       mov    ax,4[bp]
-                       mov    es,ax
-                       xor    cx,cx
-                       mov    cl,Byte ptr DS:[LongLC]
-                       dec    cl
-                       mov    si,2[LongLC]
-                       cld
-                       rep    movsb
-                       ret    2*2
-GetCommanderLine EndP
-
-    ;rutina para imprimir la parte entera del numero
-    ;recibe: bx = numero a convertir
-    ;retorna nada
-Print_Num Proc Near
-                       mov    di, offset bufferDiv+4          ;puntero al final de la parte entera del buffer
-                       mov    cx,0                            ;contador
-                       mov    ax,bx                           ;numero a convertir
-                       mov    bx,10                           ;divisor para convertir a decimal
-
-    loopNum:           
-                       mov    dx,0                            ;extender el dividendo a 32 bits (DX:AX)
-                       div    bx                              ;dividir ax entre bx, AX = cociente (parte entera), DX = residuo (parte decimal)
-                       add    dx,'0'                          ;convertir el digito a su caracter ASCII
-                       mov    [di],dl                         ;guardar el digito en el buffer
-                       dec    di                              ;decrementar el puntero al buffer
-                       inc    cx                              ;incrementar el contador
-                       cmp    ax,0                            ;comparar cociente con 0
-                       jne    loopNum                         ;si no, continuar
-                       ret
-Print_Num EndP
-
-    ;rutina para imprimir la parte fraccionaria del numero
-    ;recibe: bx = numero a convertir
-    ;retorna nada
-Print_Dec Proc Near
-                       mov    di, offset bufferDiv+6          ;puntero al final de la parte decimal del buffer
-                       mov    ax,bx                           ;numero a convertir
-                       mov    bx,10                           ;divisor para convertir a decimal
-                       mov    cx,0                            ;contador
-
-    ;imprimir primer decimal
-                       mov    dx,0                            ;extender el dividendo a 32 bits (DX:AX)
-                       div    bx
-                       add    al,'0'
-                       mov    [di],al                         ;guardar el digito en el buffer
-                       mov    ax,dx                           ;almacenar residuo para siguiente digito
-                       inc    di
-    ;imprimir segundo decimal
-                       add    dl,'0'                          ;segundo decimal a ASCII
-                       mov    [di],dl                         ;guardar dìgito en el buffer
-                       ret
-Print_Dec EndP
-
 
 Comparaciones Proc near
     ; Comapraciones
@@ -663,17 +601,25 @@ Comparaciones endp
                        xor    ax,ax                           ;limpiar ax
                        xor    bx,bx                           ;limpiar bx
                        mov    ax,num1                         ;poner en ax el valor de num1
-                       mov    dx,0                            ;extender el dividendo a 32 bits (DX:AX)
+                       xor    dx,dx                           ;extender el dividendo a 32 bits (DX:AX)
                        mov    cx,num2                         ;poner en cx el valor de num2
                        cmp    cx,0                            ;comparar si num2 es 0 para evitar division por 0
                        je     error                           ;si es 0 saltar a error
                        div    cx                              ;dividir ax entre cx, AX = cociente (parte entera), DX = residuo (parte decimal)
             
     ;almacenar la parte entera en el buffer
-                       mov    bx,ax
-                       push   dx                              ; guardar el residuo en la pila
+                       mov    di, offset bufferDiv+4          ;puntero al final de la parte entera del buffer
+    loopNum:           
+                       push   di                              ;guardar buffer en la pila
+                       push   ax                              ; guarda la parte entera
+                       push   dx                              ;guardar el residuo en la pila
                        call   print_num
-                       pop    dx                              ;recuperar el residuo
+                       pop    dx
+                       pop    ax
+                       pop    di
+                       cmp    ax,0                            ;comparar cociente con 0
+                       jne    loopNum                         ;si no, continuar
+    ;pop    dx                              ;recuperar el residuo
 
     ;calcular la parte fraccionaria (2 decimales)
                        mov    ax,dx                           ;mover el residuo de la division a ax
@@ -684,7 +630,9 @@ Comparaciones endp
     ;resultado: AX = parte decimal, DX = residuo
             
     ;almacenar la parte fraccionaria en el buffer
-                       mov    bx,ax
+                       mov    di, offset bufferDiv+6          ;puntero al final de la parte decimal del buffer
+                       push   di                              ;se guarda el buffer de división
+                       push   ax                              ;se guardan los dos decimales del resultado
                        call   print_dec                       ;imprimir decimales
 
     ;impresion resultado
@@ -694,6 +642,7 @@ Comparaciones endp
                        mov    dx,offset bufferDiv
                        pushA
                        call   PrintString
+                       
                        jmp    short puenteSalir               ;saltar a salir
 
     error:             
