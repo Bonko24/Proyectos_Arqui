@@ -11,63 +11,67 @@ Pila Segment
 Pila EndS
 
 Datos Segment
-    menu_msg       db 13,10,'======== MENU ========',13,10
-                   db '1. Agregar empleado',13,10
-                   db '2. Listar empleados',13,10
-                   db '3. Modificar empleado',13,10
-                   db '4. Eliminar empleado',13,10
-                   db '5. Salir',13,10
-                   db 'Opcion: $'
+    menu_msg          db 13,10,'======== MENU ========',13,10
+                      db '1. Agregar empleado',13,10
+                      db '2. Listar empleados',13,10
+                      db '3. Modificar empleado',13,10
+                      db '4. Eliminar empleado',13,10
+                      db '5. Salir',13,10
+                      db 'Opcion: $'
 
     ;mensajes comunes (compartidos)
-    msg_empresa    db 13,10,13,10,'Empresa: (20 char max)  $'
-    msg_nombre     db 13,10,'Nombre: (45 char max)  $'
-    msg_cedula     db 13,10,'Cedula: (12 char max)  $'
-    msg_telefono   db 13,10,'Telefono: (15 char max)  $'
-    msg_email      db 13,10,'Email: (35 char max)  $'
-    msg_pregunta   db 13,10,13,10,'Ingresar otro? (s/n):  $'
-    msg_error      db 13,10,'Error en archivo...$'
-    msg_no_archivo db 13,10,'Problema con el archivo...$'
-    msg_listando   db 13,10,'--- LISTA DE EMPLEADOS ---',13,10,'$'
-    msg_guardado   db 13,10,'Empleado guardado...$'
-    msg_modificado db 13,10,'Empleado modificado...$'
-    msg_eliminado  db 13,10,'Empleado eliminado...$'
+    msg_empresa       db 13,10,13,10,'Empresa: (20 char max)  $'
+    msg_nombre        db 13,10,'Nombre: (45 char max)  $'
+    msg_cedula        db 13,10,'Cedula: (12 char max)  $'
+    msg_telefono      db 13,10,'Telefono: (15 char max)  $'
+    msg_email         db 13,10,'Email: (35 char max)  $'
+    msg_pregunta      db 13,10,13,10,'Ingresar otro? (s/n):  $'
+    msg_error         db 13,10,'Error en archivo...$'
+    msg_no_archivo    db 13,10,'Problema con el archivo...$'
+    msg_listando      db 13,10,'--- LISTA DE EMPLEADOS ---',13,10,'$'
+    msg_guardado      db 13,10,'Empleado guardado...$'
+    msg_modificado    db 13,10,'Empleado modificado...$'
+    msg_eliminado     db 13,10,'Empleado eliminado...$'
+    msg_buscar_cedula db 13,10,'Introduzca la cedula: $'
+    msg_not_found     db 13,10,'El empleado no existe $'
+
 
 
     ;buffers de entrada: [max_len][actual_len][datos...]
     ;IMPORTANTE: Usamos DUP(0) para evitar basura
-    buf_opcion     db 3, 0, 3 DUP(0)
-    buf_empresa    db 41, 0, 41 DUP(0)
-    buf_nombre     db 41, 0, 41 DUP(0)
-    buf_cedula     db 41, 0, 41 DUP(0)
-    buf_telefono   db 41, 0, 41 DUP(0)
-    buf_email      db 41, 0, 41 DUP(0)
-    buf_respuesta  db 3, 0, 3 DUP(0)
+    buf_opcion        db 3, 0, 3 DUP(0)
+    buf_empresa       db 41, 0, 41 DUP(0)
+    buf_nombre        db 41, 0, 41 DUP(0)
+    buf_cedula        db 41, 0, 41 DUP(0)
+    buf_telefono      db 41, 0, 41 DUP(0)
+    buf_email         db 41, 0, 41 DUP(0)
+    buf_respuesta     db 3, 0, 3 DUP(0)
 
     ;archivo
-    filename       db 'empleado.txt', 0
-    temp_file      db 'temp.txt', 0
-    rename_file    db 'temp.txt',0,'empleado.txt',0
-    handle         dw ?
-    handle_temp    dw ?
-    len_archivo    dw ?
-    out_ptr        dw ?
+    filename          db 'empleado.txt', 0
+    temp_file         db 'temp.txt', 0
+    rename_file       db 'temp.txt',0,'empleado.txt',0
+    handle            dw ?
+    handle_temp       dw ?
+    len_archivo       dw ?
+    out_ptr           dw ?
 
-    cont_empleados dw ?
-    cedula_buscar  db 41, 0, 41 DUP(0)
-    buffer_lectura db 4096 DUP(0)
-    out_buffer     db 4096 DUP(0)
-    cr_lf          db 13,10,'$'                                       ; salto de linea DOS
-    coma           db ','
-    separacion     db '/'
+    cont_empleados    dw ?
+    cedula_buscar     db 41, 0, 41 DUP(0)
+    buffer_lectura    db 4096 DUP(0)
+    out_buffer        db 4096 DUP(0)
+    out_buffer_fin    dw ?                                               ; fin del out buffer
+    cr_lf             db 13,10,'$'                                       ; salto de linea DOS
+    coma              db ','
+    separacion        db '/'
 
     ;mis variables
-    cont_comas     db ?                                               ; contador de comas
-    cont_slash     db ?                                               ; contador de slashes
-    buf_encontrada db 41 dup(0)                                       ; Buffer para guadar cédulas encontradas
-    len_empleado   db ?                                               ; longitud del empleado
-    found          db ?                                               ; Indicador si encontró la cédula
-    cont_aux       db ?                                               ; contador para caso espacial
+    cont_comas        db ?                                               ; contador de comas
+    cont_slash        db ?                                               ; contador de slashes
+    buf_encontrada    db 41 dup(0)                                       ; Buffer para guadar cédulas encontradas
+    len_empleado      db ?                                               ; longitud del empleado
+    found             db ?                                               ; Indicador si encontró la cédula
+    cont_aux          db ?                                               ; contador para caso espacial
     
     
 Datos EndS
@@ -345,7 +349,7 @@ Codigo Segment
     ;eliminar empleado
     eliminar_empleado:      
     ; Leer datos
-                            lea    dx, msg_cedula
+                            lea    dx, msg_buscar_cedula
                             push   dx
                             call   print_string
                             lea    dx, cedula_buscar
@@ -369,14 +373,15 @@ Codigo Segment
 
                             jc     puente_no_existe
                             mov    len_archivo, ax
-    
-    ; Cerrar archivo original
+
+    ; Cerrar archivo de origen
                             mov    bx, handle
                             mov    ah, 3Eh
                             int    21h
 
     ;Leer el buffer y buscar las cédulas
                             mov    cx, ax
+                            push   ax                              ; guardar la cantidad de bytes leìdos
                             lea    si, buffer_lectura
     buscar_cedula:          
                             lodsb
@@ -386,6 +391,14 @@ Codigo Segment
                             cmp    al,'/'
                             je     slash_encontrado
     siga_buscar:            
+                            loop   buscar_cedula
+                            lea    dx, msg_not_found
+                            push   dx
+                            call   print_string
+                            jmp    menu_principal
+    siga_pop:               
+                            pop    si                              ; recuerar el puntero para lodsb
+                            mov    cont_aux, 0                     ; reinicar el contador auxiliar
                             loop   buscar_cedula
 
     slash_encontrado:       
@@ -406,14 +419,16 @@ Codigo Segment
                             mov    bl, [si]
                             cmp    bl, ','
                             je     comparacion_cedulas
+                            inc    cont_aux
                             mov    [di], bl
                             inc    di
                             inc    si
                             jmp    short cedula_encontrada
                     
     comparacion_cedulas:    
-    ; pop    si
                             mov    bl, [cedula_buscar + 1]         ; Contiene la cédula ingresada
+                            cmp    cont_aux,bl
+                            jne    siga_pop
                             mov    cont_aux,bl
     
     ; SI longitudes son iguales moverse por los buffers para comarar su contenido
@@ -424,190 +439,87 @@ Codigo Segment
                             mov    bl, [si]
                             mov    dl, [di]
                             cmp    bl,dl
-                            jne    siga_buscar
+                            jne    siga_pop
                             inc    di
                             inc    si
                             dec    cont_aux
                             cmp    cont_aux,0
                             jne    contenido
-                            mov    found,1
-                            jmp    siga_buscar
-    
-
-    eliminar:               
-                            xor    ax,ax
-                            xor    si,si
-                            inc    cont_slash
-    ; modifica out_buffer
-
-
                             
+                            mov    found,1
+                            
+                            jmp    siga_pop
+    ; eliminar al empleado del buffer que se pasará a temp
+    eliminar:               
+                            pop    ax                              ; recuperar la cantidad de bytes leìdos en buffer_leacutra
+                            mov    cx,ax
+                            lea    si, buffer_lectura
+                            lea    di, out_buffer
+                            mov    cont_aux,0                      ; reinicar el contador y usarlo para contar '/'
+                            mov    bh, cont_slash
+                            xor    dx,dx
+    copiar_contenido:       
+                            cmp    bh, cont_aux
+                            jne    siga_copiar
+
+                            mov    dl, len_empleado
+                            add    si, dx                          ; le suma la longitud del empleado eliminado
+                            inc    cont_aux                        ; evita que siga incrementadno el si
+    siga_copiar:            
+                            mov    bl,[si]
+                            cmp    bl, 00h
+                            je     copiar_temp
+                            cmp    bl, '/'
+                            jne    siga_copiar2
+                            inc    cont_aux
+    siga_copiar2:           
+                            mov    [di],bl
+                            inc    di
+                            inc    si
+                            loop   copiar_contenido
+
+    copiar_temp:            
+                            mov    [out_buffer_fin], di
+                                                    
     ; Crear archivo temporal
                             lea    dx, temp_file
-                            mov    ah, 3Ch
                             mov    cx, 0
+                            mov    ah, 3Ch
                             int    21h
-                            jc     no_existe
+                            jc     error_archivo
                             mov    handle_temp, ax
-                            mov    out_ptr, 0                      ;Inicializar el puntero de salida
+    ; escribir out_buffer en temp.txt
+                            mov    ah,40h
+                            mov    bx,handle_temp
+                            mov    cx,out_buffer_fin
+                            mov    dx,offset out_buffer
+                            sub    cx,dx
+                            int    21h
 
     ; Cerrar archivo temporal
                             mov    bx, handle_temp
                             mov    ah, 3Eh
                             int    21h
    
-    
-                            
-                            
-    ;    lea si, buffer_lectura
-    ;    mov di,si
-    ;    add di,len_archivo          ;di apunta al final del buffer
-    ;    xor bx,bx                   ;bx es el indice del buffer
-    ;
-    ;    procesar_bucle:
-    ;        cmp si,di
-    ;        jge puente_fin_procesar
-    ;
-    ;        ;buscar fin del registro (o '/')
-    ;        mov cx,si
-    ;        mov ax,si
-    ;        sub ax,bx               ;ax = longitud del registro actual sin verificar
-    ;
-    ;        buscar_barra:
-    ;            cmp si,di
-    ;            jge sin_barra
-    ;            cmp byte ptr [si],'/'
-    ;            je encontrado_barra
-    ;            inc si
-    ;            jmp buscar_barra
-    ;
-    ;            sin_barra:
-    ;                ;ultimo registro sin barra
-    ;                mov si,di
-    ;
-    ;            encontrado_barra:
-    ;            ;ahora [bx .. si-1] es el registro completo
-    ;            ;extraer cedula del registro (buscar coma)
-    ;            push si
-    ;            push di
-    ;            mov di,bx
-    ;            xor cx,cx            ;cx es el indice dentro del registro actual (contador de comas)
-    ;
-    ;            buscar_coma:
-    ;                cmp di,si
-    ;                jge no_encontrada
-    ;                cmp byte ptr [di],','
-    ;                jge no_es_coma
-    ;                inc cx
-    ;                cmp cx,2
-    ;                je cedula_inicio
-    ;
-    ;                no_es_coma:
-    ;                    inc di
-    ;                    jmp buscar_coma
-    ;
-    ;                    cedula_inicio:
-    ;                        inc di  ;di apuntando al inicio de la cedula
-    ;                        push di
-    ;                        lea si, cedula_buscar
-    ;                        xor cx,cx
-    ;
-    ;                        comparar_cedula:
-    ;                            ; comparar byte a byte hasta ',' o fin de registro
-    ;                            cmp di,[bp-2]
-    ;                            cmp byte ptr [di],','
-    ;                            je cedula_fin_barra
-    ;                            cmp byte ptr [si],0
-    ;                            je ced_fin_cero
-    ;                            mov al,[di]
-    ;                            cmp al,[si]
-    ;                            jne cedula_distinta
-    ;                            inc di
-    ;                            inc si
-    ;                            jmp comparar_cedula
-    ;
-    ;    puente_fin_procesar:
-    ;        jmp fin_procesar
-    ;
-    ;                    cedula_fin_barra:
-    ;                        cmp byte ptr [si],0
-    ;                        jne cedula_distinta
-    ;                        jmp cedula_coincide
-    ;
-    ;                    ced_fin_cero:
-    ;                        cmp byte ptr [di],','
-    ;                        jne cedula_distinta
-    ;                        jmp cedula_coincide
-    ;
-    ;                    cedula_distinta:
-    ;                        pop di          ;limpiar pila
-    ;                        jmp copiar_registro
-    ;
-    ;                    cedula_coincide:
-    ;                        pop di          ;limpiar pila
-    ;                        ;coincide -> no copiar registro
-    ;                        pop di
-    ;                        pop si
-    ;                        inc si         ;si apunta al inicio del siguiente registro (saltar la '/')
-    ;                        mov bx,si
-    ;                        jmp procesar_bucle
-    ;
-    ;                no_encontrada:
-    ;                    ;no se encontro la cedula en el registro
-    ;                    pop di
-    ;                    pop si
-    ;
-    ;        copiar_registro:
-    ;            pop di
-    ;            pop si
-    ;            ;copiar registro [bx .. si] al out buffer
-    ;            lea dx, out_buffer
-    ;            add di, out_ptr
-    ;            mov cx, si
-    ;            sub cx, bx
-    ;            lea si,buffer_lectura
-    ;            add si,bx
-    ;            rep movsb
-    ;            mov out_ptr,di
-    ;            sub out_ptr,offset out_buffer
-    ;
-    ;            ;agregar barra al final
-    ;            cmp si,len_archivo
-    ;            je no_copiar_barra
-    ;            mov al,'/'
-    ;            mov [di],al
-    ;            inc out_buffer
-    ;            no_copiar_barra:
-    ;            inc si
-    ;            mov bx,si
-    ;            jmp procesar_bucle
-    ;
-    ;    fin_procesar:
-    ;        ;escribir out_ptr en archivo temporal
-    ;        mov cx, out_ptr
-    ;        cmp cx,0
-    ;        je cerrar_temp
-    ;        mov bx, handle_temp
-    ;        lea dx, out_buffer
-    ;        mov ah, 40h
-    ;        int 21h
-    ;        jc no_existe
-    ;
-    ;    cerrar_temp:
-    ;        mov bx, handle_temp
-    ;        mov ah, 3Eh
-    ;        int 21h
-    ;
-    ;        ;borrar archivo original y renombrar temporal
-    ;        lea dx, filename
-    ;        mov ah,41h
-    ;        int 21h
-    ;
-    ;        lea dx, temp_file
-    ;        mov di, offset filename
-    ;        mov ah,56h              ;renombrar archivo temp a empleado
-    ;        int 21h
+    ;borrar archivo original y renombrar temporal
+                            lea    dx, filename
+                            mov    ah,41h
+                            int    21h
 
+                            push   ds
+                            pop    es
+    
+                            lea    dx, temp_file
+                            mov    di, offset filename
+                            mov    ah,56h                          ;renombrar archivo temp a empleado
+                            int    21h
+                            
+                            lea    dx, msg_eliminado
+                            push   dx
+                            call   print_string
+                            jmp    menu_principal
+                            
+                            
     no_existe:              
                             lea    dx, msg_no_archivo
                             push   dx
