@@ -2,7 +2,7 @@
 ;Libreria de procedimientos para Programa basico de un CRUD de tarjetas de empleados
 include macroPP.asm
 
-public ClearScreenP, GotoXYP, WaitKeyP, print_string, input_string, write_char, write_field_from_buffer, escribir_en_archivo, input_buffers, vaciar_buffer
+public ClearScreenP, GotoXYP, WaitKeyP, print_string, input_string, write_char, write_field_from_buffer, escribir_en_archivo, input_buffers, vaciar_buffer, cerrar_archivoP, leer_bytesP, crear_archivoP, modo_lecturaP
 
 Procedimientos Segment
 
@@ -66,6 +66,8 @@ write_char PROC Far
 write_char ENDP
     
     ;escribe en el archivo el campo que esta en el buffer
+    ; 8[bp] : buffer
+    ; 14[bp] : handle
 write_field_from_buffer PROC FAR
                             mov   bp,sp
                             mov   dx,8[bp]
@@ -88,7 +90,7 @@ escribir_en_archivo PROC FAR
                             pushA
                             call  write_field_from_buffer
                             popA
-                            mov   dx,4[bp]
+                            mov   dx,4[bp]                   ; dx tendra una coma o un slash
                             push  bx
                             push  dx
                             call  write_char
@@ -110,6 +112,7 @@ input_buffers PROC FAR
                             retf
 input_buffers endp
 
+    ; reinicar el buffer_lectura
 vaciar_buffer PROC FAR
                             mov   bp,sp
                             mov   cx, 4096
@@ -121,6 +124,30 @@ vaciar_buffer PROC FAR
                             xor   bp,bp
                             retf  2
 vaciar_buffer ENDP
+
+    ; crear archivo
+crear_archivoP PROC far
+                            retf
+crear_archivoP endp
+
+    ; abrir achivo en modo lectura
+modo_lecturaP PROC far
+                            mov   bp, sp
+                            mov   dx, 4[bp]
+                            mov   ax, 3D00h
+                            int   21h
+                            xor   bp,bp
+                            retf
+modo_lecturaP endp
+
+    ; Leer la cantidad de bytes y mandar informaciòn a buffer_lectura
+leer_bytesP PROC far
+                            retf
+leer_bytesP endp
+    ; cerrar archivo
+cerrar_archivoP PROC far
+                            retf
+cerrar_archivoP endp
 
 Procedimientos ENDS
 End

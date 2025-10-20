@@ -4,7 +4,7 @@
 ;includes
 include macroPP.asm
 ;procedimientos
-extrn ClearScreenP:Far, GotoXYP:Far, WaitKeyP:Far, print_string:Far, input_string:Far, write_char:Far, write_field_from_buffer:FAR, escribir_en_archivo:far, vaciar_buffer:far
+extrn ClearScreenP:Far, GotoXYP:Far, WaitKeyP:Far, print_string:Far, input_string:Far, write_char:Far, write_field_from_buffer:FAR, escribir_en_archivo:far, vaciar_buffer:far, cerrar_archivoP:far, leer_bytesP:far, crear_archivoP:far, modo_lecturaP:far
 
 Pila Segment
          db 100 Dup ('?')
@@ -86,7 +86,7 @@ Codigo Segment
 
     menu_principal:       
     ;Menu principal
-                          mov            cont_comas, 0                   ; reiniciar en caso de segundo eliminar
+                          mov            cont_comas, 0                       ; reiniciar para futuras iteraciones
                           mov            cont_slash,0
                           mov            len_empleado,0
                           mov            found, 0
@@ -101,14 +101,14 @@ Codigo Segment
                           mov            cont_empleados,0
 
     ;limpiar pantalla y redireccionar cursor
-                          mov            bh,0fh                          ; da color blanco a la pantalla
-                          xor            cx,cx                           ; pone en 0 ch y cl
-                          mov            dh,24                           ; fila inferior
-                          mov            dl,79                           ; columna inferior
+                          mov            bh,0fh                              ; da color blanco a la pantalla
+                          xor            cx,cx                               ; pone en 0 ch y cl
+                          mov            dh,24                               ; fila inferior
+                          mov            dl,79                               ; columna inferior
                           pushA
-                          call           ClearScreenP                    ; limpiar pantalla
-                          xor            dx,dx                           ; poner en 0 dh y dl para redireccionar cursor a 0,0
-                          call           GotoXYP                         ; redireccionar cursor a 0,0
+                          call           ClearScreenP                        ; limpiar pantalla
+                          xor            dx,dx                               ; poner en 0 dh y dl para redireccionar cursor a 0,0
+                          call           GotoXYP                             ; redireccionar cursor a 0,0
 
     ;procesar opcion
                           mov            al, [buf_opcion + 2]
@@ -116,6 +116,8 @@ Codigo Segment
                           je             agregar_empleado
                           cmp            al, '2'
                           je             puenteListar
+                          cmp            al, '3'
+                          je             puenteModificar
                           cmp            al, '4'
                           je             puenteEliminar
                           cmp            al, '5'
@@ -138,6 +140,8 @@ Codigo Segment
     ;puentes
     puenteListar:         
                           jmp            listar_empleados
+    puenteModificar:      
+                          jmp            puenteModificar1
     puenteEliminar:       
                           jmp            puenteEliminar1
     puenteSalir:          
@@ -166,7 +170,7 @@ Codigo Segment
     ;mover puntero al final del archivo
     mover_al_final:       
                           mov            bx, handle
-                          mov            ax, 4202h                       ; Mover al final (EOF)
+                          mov            ax, 4202h                           ; Mover al final (EOF)
                           xor            cx, cx
                           xor            dx, dx
                           int            21h
@@ -190,7 +194,22 @@ Codigo Segment
                           push           dx
                           call           escribir_en_archivo
 
+                          lea            si, buf_opcion
+                          mov            dl, [si+2]
+                          cmp            dl, '3'
+                          je             agregar_modificar
+
+                          
                           lea            si, buf_cedula
+                          mov            dx,offset coma
+                          push           si
+                          push           dx
+                          call           escribir_en_archivo
+                          jmp            siga_agregar
+
+    ; EN caso que la opcion sea modificar, se agrega la cedula que se está buscando
+    agregar_modificar:    
+                          lea            si, cedula_buscar
                           mov            dx,offset coma
                           push           si
                           push           dx
@@ -212,6 +231,11 @@ Codigo Segment
                           push           si
                           push           dx
                           call           escribir_en_archivo
+    
+                          lea            si, buf_opcion                      ; COmprobar si está en una iteración de modificar
+                          mov            bl, [si+2]
+                          cmp            bl, '3'
+                          je             puenteModificar3
 
                           jmp            short siga
 
@@ -229,14 +253,14 @@ Codigo Segment
 
 
     ;limpiar pantalla y redireccionar cursor
-                          mov            bh,0fh                          ; da color blanco a la pantalla
-                          xor            cx,cx                           ; pone en 0 ch y cl
-                          mov            dh,24                           ; fila inferior
-                          mov            dl,79                           ; columna inferior
+                          mov            bh,0fh                              ; da color blanco a la pantalla
+                          xor            cx,cx                               ; pone en 0 ch y cl
+                          mov            dh,24                               ; fila inferior
+                          mov            dl,79                               ; columna inferior
                           pushA
-                          call           ClearScreenP                    ; limpiar pantalla
-                          xor            dx,dx                           ; poner en 0 dh y dl para redireccionar cursor a 0,0
-                          call           GotoXYP                         ; redireccionar cursor a 0,0
+                          call           ClearScreenP                        ; limpiar pantalla
+                          xor            dx,dx                               ; poner en 0 dh y dl para redireccionar cursor a 0,0
+                          call           GotoXYP                             ; redireccionar cursor a 0,0
 
     ; ¿Agregar otro?
     agregar_otro:         
@@ -265,6 +289,10 @@ Codigo Segment
 
     puenteEliminar1:      
                           jmp            eliminar_empleado
+    puenteModificar1:     
+                          jmp            puenteModificar2
+    puenteModificar3:     
+                          jmp            siga_modificar2
 
     ;listar empleados
     listar_empleados:     
@@ -272,7 +300,6 @@ Codigo Segment
                           push           dx
                           call           print_string
     ; vaciar buffer_lectura por si acaso
-
                           mov            dx, offset buffer_lectura
                           pushA
                           push           dx
@@ -280,8 +307,8 @@ Codigo Segment
                           popA
     ; Abrir archivo en modo solo lectura
                           lea            dx, filename
-                          mov            ax, 3D00h
-                          int            21h
+                          push           dx
+                          call           modo_lecturaP
                           jc             puente_no_existe
 
                           mov            handle, ax
@@ -289,12 +316,12 @@ Codigo Segment
     ; Lee el número total de bytes que leyó en el archivo
     leer_bucle:           
                           mov            bx, handle
-                          mov            cx, 4096                        ; número de bytes que desea leer
-                          lea            dx, buffer_lectura              ; acá se guardan los bytes leídos
-                          mov            ah, 3Fh                         ; Leer desde archivo
+                          mov            cx, 4096                            ; número de bytes que desea leer
+                          lea            dx, buffer_lectura                  ; acá se guardan los bytes leídos
+                          mov            ah, 3Fh                             ; Leer desde archivo
                           int            21h
 
-                          cmp            ax, 0                           ; ¿Fin del archivo?
+                          cmp            ax, 0                               ; ¿Fin del archivo?
                           je             fin_lectura
 
     ; Imprimir los ax bytes leídos
@@ -305,7 +332,7 @@ Codigo Segment
                           mov            dl,al
                           cmp            dl,'/'
                           je             enter
-                          mov            ah, 02h                         ; Imprimir carácter
+                          mov            ah, 02h                             ; Imprimir carácter
                           int            21h
                           loop           imprimir_bucle
 
@@ -328,29 +355,24 @@ Codigo Segment
     puente_no_existe:     
                           jmp            no_existe
 
-    
+    puenteModificar2:     
+                          jmp            modificar_empleado
     ;eliminar empleado
     eliminar_empleado:    
     ; Leer datos
-                          lea            dx, msg_buscar_cedula
-                          push           dx
-                          call           print_string
-                          lea            dx, cedula_buscar
-                          push           dx
-                          call           input_string
+                          input_buffersM msg_buscar_cedula, cedula_buscar
     ; vaciar buffer de lectur
                           mov            dx, offset buffer_lectura
                           push           dx
                           call           vaciar_buffer
     ; Abrir archivo original en modo solo lectura
                           lea            dx, filename
-                          mov            ax, 3D00h
-                          int            21h
+                          push           dx
+                          call           modo_lecturaP
                           jc             puente_no_existe
                           mov            handle, ax
     
     ; Leer todo el archivo y copiar a buffer
-    ; hacer bucle acá (posiblemente)
                           mov            bx, handle
                           mov            cx, 4096
                           lea            dx, buffer_lectura
@@ -367,7 +389,7 @@ Codigo Segment
 
     ;Leer el buffer y buscar las cédulas
                           mov            cx, ax
-                          push           ax                              ; guardar la cantidad de bytes leìdos
+                          push           ax                                  ; guardar la cantidad de bytes leìdos
                           lea            si, buffer_lectura
     buscar_cedula:        
                           lodsb
@@ -383,22 +405,22 @@ Codigo Segment
                           call           print_string
                           jmp            menu_principal
     siga_pop:             
-                          pop            si                              ; recuerar el puntero para lodsb
-                          mov            cont_aux, 0                     ; reinicar el contador auxiliar
+                          pop            si                                  ; recuerar el puntero para lodsb
+                          mov            cont_aux, 0                         ; reinicar el contador auxiliar
                           loop           buscar_cedula
 
     slash_encontrado:     
-                          cmp            found,1                         ; comprabar si se encontró la cédula indicada
+                          cmp            found,1                             ; comprabar si se encontró la cédula indicada
                           je             eliminar
-                          mov            cont_comas,0                    ; reiniciar contador de comas
-                          mov            len_empleado,0                  ; reiniciar el incremento
+                          mov            cont_comas,0                        ; reiniciar contador de comas
+                          mov            len_empleado,0                      ; reiniciar el incremento
                           inc            cont_slash
                           jmp            short siga_buscar
     coma_encontrada:      
                           inc            cont_comas
                           cmp            cont_comas,2
-                          jne            siga_buscar                     ; continuar el bucle de donde lo dejó
-                          push           si                              ; guardar la direcciòn actual en bufer lectura
+                          jne            siga_buscar                         ; continuar el bucle de donde lo dejó
+                          push           si                                  ; guardar la direcciòn actual en bufer lectura
                           lea            di,buf_encontrada
     
     cedula_encontrada:    
@@ -412,15 +434,15 @@ Codigo Segment
                           jmp            short cedula_encontrada
                     
     comparacion_cedulas:  
-                          mov            bl, [cedula_buscar + 1]         ; Contiene la cédula ingresada
+                          mov            bl, [cedula_buscar + 1]             ; Contiene la cédula ingresada
                           cmp            cont_aux,bl
                           jne            siga_pop
                           mov            cont_aux,bl
     
     ; SI longitudes son iguales moverse por los buffers para comarar su contenido
     ;mov    cont_aux,bx
-                          lea            si, 2[cedula_buscar]            ;cedula buscada
-                          lea            di, [buf_encontrada]            ; cedula actual
+                          lea            si, 2[cedula_buscar]                ;cedula buscada
+                          lea            di, [buf_encontrada]                ; cedula actual
     contenido:            
                           mov            bl, [si]
                           mov            dl, [di]
@@ -435,13 +457,15 @@ Codigo Segment
                           mov            found,1
                             
                           jmp            siga_pop
+    puente_eliminar1:     
+                          jmp            eliminar_empleado
     ; eliminar al empleado del buffer que se pasará a temp
     eliminar:             
-                          pop            ax                              ; recuperar la cantidad de bytes leìdos en buffer_leacutra
+                          pop            ax                                  ; recuperar la cantidad de bytes leìdos en buffer_leacutra
                           mov            cx,ax
                           lea            si, buffer_lectura
                           lea            di, out_buffer
-                          mov            cont_aux,0                      ; reinicar el contador y usarlo para contar '/'
+                          mov            cont_aux,0                          ; reinicar el contador y usarlo para contar '/'
                           mov            bh, cont_slash
                           xor            dx,dx
     copiar_contenido:     
@@ -449,8 +473,8 @@ Codigo Segment
                           jne            siga_copiar
 
                           mov            dl, len_empleado
-                          add            si, dx                          ; le suma la longitud del empleado eliminado
-                          inc            cont_aux                        ; evita que siga incrementadno el si
+                          add            si, dx                              ; le suma la longitud del empleado eliminado
+                          inc            cont_aux                            ; evita que siga incrementadno el si
     siga_copiar:          
                           mov            bl,[si]
                           cmp            bl, 00h
@@ -472,7 +496,7 @@ Codigo Segment
                           mov            cx, 0
                           mov            ah, 3Ch
                           int            21h
-                          jc             error_archivo
+                          jc             puente_error
                           mov            handle_temp, ax
     ; escribir out_buffer en temp.txt
                           mov            ah,40h
@@ -497,14 +521,51 @@ Codigo Segment
     
                           lea            dx, temp_file
                           mov            di, offset filename
-                          mov            ah,56h                          ;renombrar archivo temp a empleado
+                          mov            ah,56h                              ;renombrar archivo temp a empleado
                           int            21h
                             
                           lea            dx, msg_eliminado
                           push           dx
                           call           print_string
+
+                          lea            si, buf_opcion
+                          mov            bl, [si+2]
+                          cmp            bl, '3'
+                          je             siga_modificar
+
                           jmp            menu_principal
-                            
+    puente_error:         
+                          jmp            error_archivo
+    modificar_empleado:   
+    ; Preguntar por cedula y eliminar en caso de encontrarlo
+                          jmp            eliminar_empleado
+
+    siga_modificar:       
+    ; preguntar por nuevos datos
+                          input_buffersM msg_empresa, buf_empresa
+                          input_buffersM msg_nombre, buf_nombre
+                          input_buffersM msg_telefono, buf_telefono
+                          input_buffersM msg_email, buf_email
+    
+    ; agregar empleado con misma cedula y nuevos datos
+    ; Abrir el archivo y mover el cursor al final
+                          lea            dx, filename
+                          mov            ax, 3D02h
+                          int            21h
+                          mov            handle, ax
+                          jmp            mover_al_final
+    siga_modificar2:      
+                          lea            dx, msg_modificado
+                          push           dx
+                          call           print_string
+                          call           WaitKeyP
+    ; cerrrar el archivo
+                          mov            bx, handle
+                          mov            ah, 3Eh
+                          int            21h
+                          
+                          jmp            menu_principal
+
                             
     no_existe:            
                           lea            dx, msg_no_archivo
