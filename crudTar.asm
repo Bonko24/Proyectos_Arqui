@@ -4,7 +4,7 @@
 ;includes
 include macroPP.asm
 ;procedimientos
-extrn ClearScreenP:Far, GotoXYP:Far, WaitKeyP:Far, print_string:Far, input_string:Far, write_comma:Far, write_backSlash:Far
+extrn ClearScreenP:Far, GotoXYP:Far, WaitKeyP:Far, print_string:Far, input_string:Far, write_comma:Far, write_backSlash:Far, write_field_from_buffer:FAR
 
 Pila Segment
          db 100 Dup ('?')
@@ -77,484 +77,477 @@ Datos Segment
 Datos EndS
 
 Codigo Segment
-                            Assume CS:Codigo, SS:Pila, DS:Datos
-    Inicio:                 
+                          Assume CS:Codigo, SS:Pila, DS:Datos
+    Inicio:               
     ;inicializacion Datos Segment
-                            xor    ax,ax
-                            mov    ax,Datos
-                            mov    ds,ax
+                          xor    ax,ax
+                          mov    ax,Datos
+                          mov    ds,ax
 
-    menu_principal:         
+    menu_principal:       
     ;Menu principal
-                            lea    dx, menu_msg
-                            push   dx
-                            call   print_string
+                          lea    dx, menu_msg
+                          push   dx
+                          call   print_string
     ;leer opcion
-                            lea    dx, buf_opcion
-                            push   dx
-                            call   input_string
-                            mov    cont_empleados,0
+                          lea    dx, buf_opcion
+                          push   dx
+                          call   input_string
+                          mov    cont_empleados,0
 
     ;limpiar pantalla y redireccionar cursor
-                            mov    bh,0fh                          ; da color blanco a la pantalla
-                            xor    cx,cx                           ; pone en 0 ch y cl
-                            mov    dh,24                           ; fila inferior
-                            mov    dl,79                           ; columna inferior
-                            pushA
-                            call   ClearScreenP                    ; limpiar pantalla
-                            xor    dx,dx                           ; poner en 0 dh y dl para redireccionar cursor a 0,0
-                            call   GotoXYP                         ; redireccionar cursor a 0,0
+                          mov    bh,0fh                          ; da color blanco a la pantalla
+                          xor    cx,cx                           ; pone en 0 ch y cl
+                          mov    dh,24                           ; fila inferior
+                          mov    dl,79                           ; columna inferior
+                          pushA
+                          call   ClearScreenP                    ; limpiar pantalla
+                          xor    dx,dx                           ; poner en 0 dh y dl para redireccionar cursor a 0,0
+                          call   GotoXYP                         ; redireccionar cursor a 0,0
 
     ;procesar opcion
-                            mov    al, [buf_opcion + 2]
-                            cmp    al, '1'
-                            je     agregar_empleado
-                            cmp    al, '2'
-                            je     puenteListar
-                            cmp    al, '4'
-                            je     puenteEliminar
-                            cmp    al, '5'
-                            je     puenteSalir
-                            jmp    menu_principal
+                          mov    al, [buf_opcion + 2]
+                          cmp    al, '1'
+                          je     agregar_empleado
+                          cmp    al, '2'
+                          je     puenteListar
+                          cmp    al, '4'
+                          je     puenteEliminar
+                          cmp    al, '5'
+                          je     puenteSalir
+                          jmp    menu_principal
 
     ;proceso para leer datos del empleado
-    agregar_empleado:       
+    agregar_empleado:     
     ; Leer datos
-                            lea    dx, msg_empresa
-                            push   dx
-                            call   print_string
-                            lea    dx, buf_empresa
-                            push   dx
-                            call   input_string
+                          lea    dx, msg_empresa
+                          push   dx
+                          call   print_string
+                          lea    dx, buf_empresa
+                          push   dx
+                          call   input_string
 
-                            lea    dx, msg_nombre
-                            push   dx
-                            call   print_string
-                            lea    dx, buf_nombre
-                            push   dx
-                            call   input_string
+                          lea    dx, msg_nombre
+                          push   dx
+                          call   print_string
+                          lea    dx, buf_nombre
+                          push   dx
+                          call   input_string
 
-                            lea    dx, msg_cedula
-                            push   dx
-                            call   print_string
-                            lea    dx, buf_cedula
-                            push   dx
-                            call   input_string
+                          lea    dx, msg_cedula
+                          push   dx
+                          call   print_string
+                          lea    dx, buf_cedula
+                          push   dx
+                          call   input_string
 
-                            lea    dx, msg_telefono
-                            push   dx
-                            call   print_string
-                            lea    dx, buf_telefono
-                            push   dx
-                            call   input_string
+                          lea    dx, msg_telefono
+                          push   dx
+                          call   print_string
+                          lea    dx, buf_telefono
+                          push   dx
+                          call   input_string
 
-                            lea    dx, msg_email
-                            push   dx
-                            call   print_string
-                            lea    dx, buf_email
-                            push   dx
-                            call   input_string
+                          lea    dx, msg_email
+                          push   dx
+                          call   print_string
+                          lea    dx, buf_email
+                          push   dx
+                          call   input_string
 
-                            inc    cont_empleados
-                            cmp    cont_empleados, 1
-                            jg     mover_al_final
+                          inc    cont_empleados
+                          cmp    cont_empleados, 1
+                          jg     mover_al_final
 
     ; Abrir archivo (modo lectura/escritura)
-    abrir_archivo:          
-                            lea    dx, filename
-                            mov    ax, 3D02h
-                            int    21h
-                            jc     crear_archivo
-                            mov    handle, ax
-                            jmp    mover_al_final
+    abrir_archivo:        
+                          lea    dx, filename
+                          mov    ax, 3D02h
+                          int    21h
+                          jc     crear_archivo
+                          mov    handle, ax
+                          jmp    mover_al_final
 
     ;puentes
-    puenteListar:           
-                            jmp    listar_empleados
-    puenteEliminar:         
-                            jmp    puenteEliminar1
-    puenteSalir:            
-                            jmp    salir_programa
+    puenteListar:         
+                          jmp    listar_empleados
+    puenteEliminar:       
+                          jmp    puenteEliminar1
+    puenteSalir:          
+                          jmp    salir_programa
 
-    crear_archivo:          
-                            lea    dx, filename
-                            mov    cx, 0
-                            mov    ah, 3Ch
-                            int    21h
-                            jc     puenteErrorArchivo
-                            mov    handle, ax
-                            jmp    escribir_empleado
+    crear_archivo:        
+                          lea    dx, filename
+                          mov    cx, 0
+                          mov    ah, 3Ch
+                          int    21h
+                          jc     puenteErrorArchivo1
+                          mov    handle, ax
+                          jmp    escribir_empleado
 
     ;mover puntero al final del archivo
-    mover_al_final:         
-                            mov    bx, handle
-                            mov    ax, 4202h                       ; Mover al final (EOF)
-                            xor    cx, cx
-                            xor    dx, dx
-                            int    21h
+    mover_al_final:       
+                          mov    bx, handle
+                          mov    ax, 4202h                       ; Mover al final (EOF)
+                          xor    cx, cx
+                          xor    dx, dx
+                          int    21h
 
     ;escribir empleado en archivo
-    escribir_empleado:      
+    escribir_empleado:    
     ; Verificar que handle sea válido (bx = handle)
     ; Escribir empresa
-                            lea    si, buf_empresa
-                            call   write_field_from_buffer
-                            mov    bx, handle
-                            push   bx
-                            mov    dx,offset coma
-                            push   dx
-                            call   write_comma
+                          mov    bx, handle
+                          
+                          lea    si, buf_empresa
+                          pushA
+                          call   write_field_from_buffer
+                          popA
+                          push   bx
+                          mov    dx,offset coma
+                          push   dx
+                          call   write_comma
 
-                            lea    si, buf_nombre
-                            call   write_field_from_buffer
-                            mov    bx, handle
-                            push   bx
-                            mov    dx,offset coma
-                            push   dx
-                            call   write_comma
+                          lea    si, buf_nombre
+                          pushA
+                          call   write_field_from_buffer
+                          popA
+                          push   bx
+                          mov    dx,offset coma
+                          push   dx
+                          call   write_comma
 
-                            lea    si, buf_cedula
-                            call   write_field_from_buffer
-                            mov    bx, handle
-                            push   bx
-                            mov    dx,offset coma
-                            push   dx
-                            call   write_comma
+                          lea    si, buf_cedula
+                          pushA
+                          call   write_field_from_buffer
+                          popA
+                          push   bx
+                          mov    dx,offset coma
+                          push   dx
+                          call   write_comma
+                          jmp    short siga_agregar
+    puenteErrorArchivo1:  
+                          jmp    puenteErrorArchivo
 
-                            lea    si, buf_telefono
-                            call   write_field_from_buffer
-                            mov    bx, handle
-                            push   bx
-                            mov    dx,offset coma
-                            push   dx
-                            call   write_comma
+    siga_agregar:         
+                          lea    si, buf_telefono
+                          pushA
+                          call   write_field_from_buffer
+                          popA
+                          push   bx
+                          mov    dx,offset coma
+                          push   dx
+                          call   write_comma
 
-                            lea    si, buf_email
-                            call   write_field_from_buffer
-                            mov    bx, handle
-                            push   bx
-                            mov    dx,offset separacion
-                            push   dx
-                            call   write_backSlash
-                            jmp    short siga
+                          lea    si, buf_email
+                          pushA
+                          call   write_field_from_buffer
+                          popA
+                          push   bx
+                          mov    dx,offset separacion
+                          push   dx
+                          call   write_backSlash
+                          jmp    short siga
 
-    puenteAgregarEmpleado:  
-                            jmp    agregar_empleado
-    puenteErrorArchivo:     
-                            jmp    error_archivo
+    puenteAgregarEmpleado:
+                          jmp    agregar_empleado
+    puenteErrorArchivo:   
+                          jmp    error_archivo
 
-    siga:                   
+    siga:                 
     ;mensaje empleado guardado
-                            lea    dx, msg_guardado
-                            push   dx
-                            call   print_string
-                            call   WaitKeyP
+                          lea    dx, msg_guardado
+                          push   dx
+                          call   print_string
+                          call   WaitKeyP
 
 
     ;limpiar pantalla y redireccionar cursor
-                            mov    bh,0fh                          ; da color blanco a la pantalla
-                            xor    cx,cx                           ; pone en 0 ch y cl
-                            mov    dh,24                           ; fila inferior
-                            mov    dl,79                           ; columna inferior
-                            pushA
-                            call   ClearScreenP                    ; limpiar pantalla
-                            xor    dx,dx                           ; poner en 0 dh y dl para redireccionar cursor a 0,0
-                            call   GotoXYP                         ; redireccionar cursor a 0,0
+                          mov    bh,0fh                          ; da color blanco a la pantalla
+                          xor    cx,cx                           ; pone en 0 ch y cl
+                          mov    dh,24                           ; fila inferior
+                          mov    dl,79                           ; columna inferior
+                          pushA
+                          call   ClearScreenP                    ; limpiar pantalla
+                          xor    dx,dx                           ; poner en 0 dh y dl para redireccionar cursor a 0,0
+                          call   GotoXYP                         ; redireccionar cursor a 0,0
 
     ; ¿Agregar otro?
-    agregar_otro:           
-                            lea    dx, msg_pregunta
-                            push   dx
-                            call   print_string
-                            lea    dx, buf_respuesta
-                            push   dx
-                            call   input_string
-                            mov    al, [buf_respuesta + 2]
-                            cmp    al, 's'
-                            je     puenteAgregarEmpleado
-                            cmp    al,'n'
-                            je     cerrar_archivo
-                            jmp    agregar_otro
+    agregar_otro:         
+                          lea    dx, msg_pregunta
+                          push   dx
+                          call   print_string
+                          lea    dx, buf_respuesta
+                          push   dx
+                          call   input_string
+                          mov    al, [buf_respuesta + 2]
+                          cmp    al, 's'
+                          je     puenteAgregarEmpleado
+                          cmp    al,'n'
+                          je     cerrar_archivo
+                          jmp    agregar_otro
 
     ; Cerrar archivo
-    cerrar_archivo:         
-                            mov    bx, handle
-                            mov    ah, 3Eh
-                            int    21h
-                            mov    al, [buf_opcion + 2]
-                            cmp    al,'5'
-                            je     puenteSalir1
-                            jmp    menu_principal
+    cerrar_archivo:       
+                          mov    bx, handle
+                          mov    ah, 3Eh
+                          int    21h
+                          mov    al, [buf_opcion + 2]
+                          cmp    al,'5'
+                          je     puenteSalir1
+                          jmp    menu_principal
 
-    puenteEliminar1:        
-                            jmp    eliminar_empleado
+    puenteEliminar1:      
+                          jmp    eliminar_empleado
 
     ;listar empleados
-    listar_empleados:       
-                            lea    dx, msg_listando
-                            push   dx
-                            call   print_string
+    listar_empleados:     
+                          lea    dx, msg_listando
+                          push   dx
+                          call   print_string
 
     ; Abrir archivo en modo solo lectura
-                            lea    dx, filename
-                            mov    ax, 3D00h
-                            int    21h
-                            jc     puente_no_existe
+                          lea    dx, filename
+                          mov    ax, 3D00h
+                          int    21h
+                          jc     puente_no_existe
 
-                            mov    handle, ax
+                          mov    handle, ax
     
     ; Lee el número total de bytes que leyó en el archivo
-    leer_bucle:             
-                            mov    bx, handle
-                            mov    cx, 4096                        ; número de bytes que desea leer
-                            lea    dx, buffer_lectura              ; acá se guardan los bytes leídos
-                            mov    ah, 3Fh                         ; Leer desde archivo
-                            int    21h
+    leer_bucle:           
+                          mov    bx, handle
+                          mov    cx, 4096                        ; número de bytes que desea leer
+                          lea    dx, buffer_lectura              ; acá se guardan los bytes leídos
+                          mov    ah, 3Fh                         ; Leer desde archivo
+                          int    21h
 
-                            cmp    ax, 0                           ; ¿Fin del archivo?
-                            je     fin_lectura
+                          cmp    ax, 0                           ; ¿Fin del archivo?
+                          je     fin_lectura
 
     ; Imprimir los ax bytes leídos
-                            mov    cx, ax
-                            lea    si, buffer_lectura
-    imprimir_bucle:         
-                            lodsb
-                            mov    dl,al
-                            cmp    dl,'/'
-                            je     enter
-                            mov    ah, 02h                         ; Imprimir carácter
-                            int    21h
-                            loop   imprimir_bucle
+                          mov    cx, ax
+                          lea    si, buffer_lectura
+    imprimir_bucle:       
+                          lodsb
+                          mov    dl,al
+                          cmp    dl,'/'
+                          je     enter
+                          mov    ah, 02h                         ; Imprimir carácter
+                          int    21h
+                          loop   imprimir_bucle
 
-                            jmp    leer_bucle
+                          jmp    leer_bucle
 
-    enter:                  
-                            lea    dx, cr_lf
-                            push   dx
-                            call   print_string
-                            jmp    short imprimir_bucle
+    enter:                
+                          lea    dx, cr_lf
+                          push   dx
+                          call   print_string
+                          jmp    short imprimir_bucle
 
-    fin_lectura:            
-                            mov    bx, handle
-                            mov    ah, 3Eh
-                            int    21h
-                            jmp    cerrar_archivo
+    fin_lectura:          
+                          mov    bx, handle
+                          mov    ah, 3Eh
+                          int    21h
+                          jmp    cerrar_archivo
 
-    puenteSalir1:           
-                            jmp    salir_programa
-    puente_no_existe:       
-                            jmp    no_existe
+    puenteSalir1:         
+                          jmp    salir_programa
+    puente_no_existe:     
+                          jmp    no_existe
 
     
     ;eliminar empleado
-    eliminar_empleado:      
+    eliminar_empleado:    
     ; Leer datos
-                            lea    dx, msg_buscar_cedula
-                            push   dx
-                            call   print_string
-                            lea    dx, cedula_buscar
-                            push   dx
-                            call   input_string
+                          lea    dx, msg_buscar_cedula
+                          push   dx
+                          call   print_string
+                          lea    dx, cedula_buscar
+                          push   dx
+                          call   input_string
     
     ; Abrir archivo original en modo solo lectura
-                            lea    dx, filename
-                            mov    ax, 3D00h
-                            int    21h
-                            jc     puente_no_existe
-                            mov    handle, ax
+                          lea    dx, filename
+                          mov    ax, 3D00h
+                          int    21h
+                          jc     puente_no_existe
+                          mov    handle, ax
     
     ; Leer todo el archivo y copiar a buffer
     ; hacer bucle acá (posiblemente)
-                            mov    bx, handle
-                            mov    cx, 4096
-                            lea    dx, buffer_lectura
-                            mov    ah, 3Fh
-                            int    21h
+                          mov    bx, handle
+                          mov    cx, 4096
+                          lea    dx, buffer_lectura
+                          mov    ah, 3Fh
+                          int    21h
 
-                            jc     puente_no_existe
-                            mov    len_archivo, ax
+                          jc     puente_no_existe
+                          mov    len_archivo, ax
 
     ; Cerrar archivo de origen
-                            mov    bx, handle
-                            mov    ah, 3Eh
-                            int    21h
+                          mov    bx, handle
+                          mov    ah, 3Eh
+                          int    21h
 
     ;Leer el buffer y buscar las cédulas
-                            mov    cx, ax
-                            push   ax                              ; guardar la cantidad de bytes leìdos
-                            lea    si, buffer_lectura
-    buscar_cedula:          
-                            lodsb
-                            inc    len_empleado
-                            cmp    al,','
-                            je     coma_encontrada
-                            cmp    al,'/'
-                            je     slash_encontrado
-    siga_buscar:            
-                            loop   buscar_cedula
-                            lea    dx, msg_not_found
-                            push   dx
-                            call   print_string
-                            jmp    menu_principal
-    siga_pop:               
-                            pop    si                              ; recuerar el puntero para lodsb
-                            mov    cont_aux, 0                     ; reinicar el contador auxiliar
-                            loop   buscar_cedula
+                          mov    cx, ax
+                          push   ax                              ; guardar la cantidad de bytes leìdos
+                          lea    si, buffer_lectura
+    buscar_cedula:        
+                          lodsb
+                          inc    len_empleado
+                          cmp    al,','
+                          je     coma_encontrada
+                          cmp    al,'/'
+                          je     slash_encontrado
+    siga_buscar:          
+                          loop   buscar_cedula
+                          lea    dx, msg_not_found
+                          push   dx
+                          call   print_string
+                          jmp    menu_principal
+    siga_pop:             
+                          pop    si                              ; recuerar el puntero para lodsb
+                          mov    cont_aux, 0                     ; reinicar el contador auxiliar
+                          loop   buscar_cedula
 
-    slash_encontrado:       
-                            cmp    found,1                         ; comprabar si se encontró la cédula indicada
-                            je     eliminar
-                            mov    cont_comas,0                    ; reiniciar contador de comas
-                            mov    len_empleado,0                  ; reiniciar el incremento
-                            inc    cont_slash
-                            jmp    short siga_buscar
-    coma_encontrada:        
-                            inc    cont_comas
-                            cmp    cont_comas,2
-                            jne    siga_buscar                     ; continuar el bucle de donde lo dejó
-                            push   si                              ; guardar la direcciòn actual en bufer lectura
-                            lea    di,buf_encontrada
+    slash_encontrado:     
+                          cmp    found,1                         ; comprabar si se encontró la cédula indicada
+                          je     eliminar
+                          mov    cont_comas,0                    ; reiniciar contador de comas
+                          mov    len_empleado,0                  ; reiniciar el incremento
+                          inc    cont_slash
+                          jmp    short siga_buscar
+    coma_encontrada:      
+                          inc    cont_comas
+                          cmp    cont_comas,2
+                          jne    siga_buscar                     ; continuar el bucle de donde lo dejó
+                          push   si                              ; guardar la direcciòn actual en bufer lectura
+                          lea    di,buf_encontrada
     
-    cedula_encontrada:      
-                            mov    bl, [si]
-                            cmp    bl, ','
-                            je     comparacion_cedulas
-                            inc    cont_aux
-                            mov    [di], bl
-                            inc    di
-                            inc    si
-                            jmp    short cedula_encontrada
+    cedula_encontrada:    
+                          mov    bl, [si]
+                          cmp    bl, ','
+                          je     comparacion_cedulas
+                          inc    cont_aux
+                          mov    [di], bl
+                          inc    di
+                          inc    si
+                          jmp    short cedula_encontrada
                     
-    comparacion_cedulas:    
-                            mov    bl, [cedula_buscar + 1]         ; Contiene la cédula ingresada
-                            cmp    cont_aux,bl
-                            jne    siga_pop
-                            mov    cont_aux,bl
+    comparacion_cedulas:  
+                          mov    bl, [cedula_buscar + 1]         ; Contiene la cédula ingresada
+                          cmp    cont_aux,bl
+                          jne    siga_pop
+                          mov    cont_aux,bl
     
     ; SI longitudes son iguales moverse por los buffers para comarar su contenido
     ;mov    cont_aux,bx
-                            lea    si, 2[cedula_buscar]            ;cedula buscada
-                            lea    di, [buf_encontrada]            ; cedula actual
-    contenido:              
-                            mov    bl, [si]
-                            mov    dl, [di]
-                            cmp    bl,dl
-                            jne    siga_pop
-                            inc    di
-                            inc    si
-                            dec    cont_aux
-                            cmp    cont_aux,0
-                            jne    contenido
+                          lea    si, 2[cedula_buscar]            ;cedula buscada
+                          lea    di, [buf_encontrada]            ; cedula actual
+    contenido:            
+                          mov    bl, [si]
+                          mov    dl, [di]
+                          cmp    bl,dl
+                          jne    siga_pop
+                          inc    di
+                          inc    si
+                          dec    cont_aux
+                          cmp    cont_aux,0
+                          jne    contenido
                             
-                            mov    found,1
+                          mov    found,1
                             
-                            jmp    siga_pop
+                          jmp    siga_pop
     ; eliminar al empleado del buffer que se pasará a temp
-    eliminar:               
-                            pop    ax                              ; recuperar la cantidad de bytes leìdos en buffer_leacutra
-                            mov    cx,ax
-                            lea    si, buffer_lectura
-                            lea    di, out_buffer
-                            mov    cont_aux,0                      ; reinicar el contador y usarlo para contar '/'
-                            mov    bh, cont_slash
-                            xor    dx,dx
-    copiar_contenido:       
-                            cmp    bh, cont_aux
-                            jne    siga_copiar
+    eliminar:             
+                          pop    ax                              ; recuperar la cantidad de bytes leìdos en buffer_leacutra
+                          mov    cx,ax
+                          lea    si, buffer_lectura
+                          lea    di, out_buffer
+                          mov    cont_aux,0                      ; reinicar el contador y usarlo para contar '/'
+                          mov    bh, cont_slash
+                          xor    dx,dx
+    copiar_contenido:     
+                          cmp    bh, cont_aux
+                          jne    siga_copiar
 
-                            mov    dl, len_empleado
-                            add    si, dx                          ; le suma la longitud del empleado eliminado
-                            inc    cont_aux                        ; evita que siga incrementadno el si
-    siga_copiar:            
-                            mov    bl,[si]
-                            cmp    bl, 00h
-                            je     copiar_temp
-                            cmp    bl, '/'
-                            jne    siga_copiar2
-                            inc    cont_aux
-    siga_copiar2:           
-                            mov    [di],bl
-                            inc    di
-                            inc    si
-                            loop   copiar_contenido
+                          mov    dl, len_empleado
+                          add    si, dx                          ; le suma la longitud del empleado eliminado
+                          inc    cont_aux                        ; evita que siga incrementadno el si
+    siga_copiar:          
+                          mov    bl,[si]
+                          cmp    bl, 00h
+                          je     copiar_temp
+                          cmp    bl, '/'
+                          jne    siga_copiar2
+                          inc    cont_aux
+    siga_copiar2:         
+                          mov    [di],bl
+                          inc    di
+                          inc    si
+                          loop   copiar_contenido
 
-    copiar_temp:            
-                            mov    [out_buffer_fin], di
+    copiar_temp:          
+                          mov    [out_buffer_fin], di
                                                     
     ; Crear archivo temporal
-                            lea    dx, temp_file
-                            mov    cx, 0
-                            mov    ah, 3Ch
-                            int    21h
-                            jc     error_archivo
-                            mov    handle_temp, ax
+                          lea    dx, temp_file
+                          mov    cx, 0
+                          mov    ah, 3Ch
+                          int    21h
+                          jc     error_archivo
+                          mov    handle_temp, ax
     ; escribir out_buffer en temp.txt
-                            mov    ah,40h
-                            mov    bx,handle_temp
-                            mov    cx,out_buffer_fin
-                            mov    dx,offset out_buffer
-                            sub    cx,dx
-                            int    21h
+                          mov    ah,40h
+                          mov    bx,handle_temp
+                          mov    cx,out_buffer_fin
+                          mov    dx,offset out_buffer
+                          sub    cx,dx
+                          int    21h
 
     ; Cerrar archivo temporal
-                            mov    bx, handle_temp
-                            mov    ah, 3Eh
-                            int    21h
+                          mov    bx, handle_temp
+                          mov    ah, 3Eh
+                          int    21h
    
     ;borrar archivo original y renombrar temporal
-                            lea    dx, filename
-                            mov    ah,41h
-                            int    21h
+                          lea    dx, filename
+                          mov    ah,41h
+                          int    21h
 
-                            push   ds
-                            pop    es
+                          push   ds
+                          pop    es
     
-                            lea    dx, temp_file
-                            mov    di, offset filename
-                            mov    ah,56h                          ;renombrar archivo temp a empleado
-                            int    21h
+                          lea    dx, temp_file
+                          mov    di, offset filename
+                          mov    ah,56h                          ;renombrar archivo temp a empleado
+                          int    21h
                             
-                            lea    dx, msg_eliminado
-                            push   dx
-                            call   print_string
-                            jmp    menu_principal
+                          lea    dx, msg_eliminado
+                          push   dx
+                          call   print_string
+                          jmp    menu_principal
                             
                             
-    no_existe:              
-                            lea    dx, msg_no_archivo
-                            push   dx
-                            call   print_string
-                            jmp    menu_principal
+    no_existe:            
+                          lea    dx, msg_no_archivo
+                          push   dx
+                          call   print_string
+                          jmp    menu_principal
 
-    salir_programa:         
+    salir_programa:       
 
-                            mov    ah, 4Ch
-                            int    21h
+                          mov    ah, 4Ch
+                          int    21h
 
-    error_archivo:          
-                            lea    dx, msg_error
-                            push   dx
-                            call   print_string
-                            jmp    menu_principal
+    error_archivo:        
+                          lea    dx, msg_error
+                          push   dx
+                          call   print_string
+                          jmp    menu_principal
 
-    ;---------------------------------------------------------Hasta Aca llega el Codigo
-    ;escribe en el archivo el campo que esta en el buffer
-write_field_from_buffer PROC
-                            pushA
-                            mov    bl, [si + 1]
-                            xor    bh, bh
-                            cmp    bx, 0
-                            je     fin
-                            mov    cx, bx
-                            mov    dx, si
-                            add    dx, 2
-                            mov    bx, handle                      ; ← ¡handle debe estar aquí!
-                            mov    ah, 40h
-                            int    21h
-    fin:                    
-                            popA
-                            ret
-write_field_from_buffer ENDP
 
 Codigo EndS
 End Inicio
