@@ -2,7 +2,7 @@
 ;Libreria de procedimientos para Programa basico de un CRUD de tarjetas de empleados
 include macroPP.asm
 
-public ClearScreenP, GotoXYP, WaitKeyP, print_string, input_string, write_char, write_field_from_buffer, escribir_en_archivo, input_buffers, vaciar_buffer, cerrar_archivoP, crear_archivoP, abrir_archivoP
+public ClearScreenP, GotoXYP, WaitKeyP, print_string, input_string, write_char, write_field_from_buffer, escribir_en_archivo, input_buffers, vaciar_buffer, cerrar_archivoP, crear_archivoP, abrir_archivoP, input_bufferP 
 
 Procedimientos Segment
 
@@ -159,7 +159,26 @@ cerrar_archivoP PROC far
                             retf  2
 cerrar_archivoP endp
 
+    ; reemplazo de la macro input_buffersM
+    ; 8[bp]: direccion del mensaje (msg_...)
+    ; 6[bp]: direccion del buffer (buf_...)
+input_bufferP PROC FAR
+                            mov   bp, sp
+                            
+                            mov   dx, [bp + 8]
+                            push  dx
+                            call  print_string
+                            
 
+                            mov   dx, [bp + 6]
+                            push  dx
+                            call  input_string
+                            
+                            retf  4
+input_bufferP ENDP
+    
+Procedimientos ENDS
+End
 
 Procedimientos ENDS
 End
