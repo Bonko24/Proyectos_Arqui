@@ -4,7 +4,7 @@
 ;includes
 include macroPP.asm
 ;procedimientos
-extrn ClearScreenP:Far, GotoXYP:Far, WaitKeyP:Far, print_string:Far, input_string:Far, write_char:Far, write_field_from_buffer:FAR, escribir_en_archivo:far, vaciar_buffer:far, cerrar_archivoP:far, leer_bytesP:far, crear_archivoP:far, modo_lecturaP:far
+extrn ClearScreenP:Far, GotoXYP:Far, WaitKeyP:Far, print_string:Far, input_string:Far, write_char:Far, write_field_from_buffer:FAR, escribir_en_archivo:far, vaciar_buffer:far, cerrar_archivoP:far, crear_archivoP:far, abrir_archivoP:far
 
 Pila Segment
          db 100 Dup ('?')
@@ -151,7 +151,9 @@ Codigo Segment
     abrir_archivo:        
                           lea            dx, filename
                           mov            ax, 3D02h
-                          int            21h
+                          push           dx
+                          push           ax
+                          call           abrir_archivoP
                           jc             crear_archivo
                           mov            handle, ax
                           jmp            mover_al_final
@@ -160,9 +162,8 @@ Codigo Segment
 
     crear_archivo:        
                           lea            dx, filename
-                          mov            cx, 0
-                          mov            ah, 3Ch
-                          int            21h
+                          push           dx
+                          call           crear_archivoP
                           jc             puenteErrorArchivo1
                           mov            handle, ax
                           jmp            escribir_empleado
@@ -280,8 +281,8 @@ Codigo Segment
     ; Cerrar archivo
     cerrar_archivo:       
                           mov            bx, handle
-                          mov            ah, 3Eh
-                          int            21h
+                          push           bx
+                          call           cerrar_archivoP
                           mov            al, [buf_opcion + 2]
                           cmp            al,'5'
                           je             puenteSalir1
@@ -307,8 +308,10 @@ Codigo Segment
                           popA
     ; Abrir archivo en modo solo lectura
                           lea            dx, filename
+                          MOV            ax, 3D00H
                           push           dx
-                          call           modo_lecturaP
+                          push           ax
+                          call           abrir_archivoP
                           jc             puente_no_existe
 
                           mov            handle, ax
@@ -343,11 +346,10 @@ Codigo Segment
                           push           dx
                           call           print_string
                           jmp            short imprimir_bucle
-
     fin_lectura:          
                           mov            bx, handle
-                          mov            ah, 3Eh
-                          int            21h
+                          push           bx
+                          call           cerrar_archivoP
                           jmp            cerrar_archivo
 
     puenteSalir1:         
@@ -367,8 +369,12 @@ Codigo Segment
                           call           vaciar_buffer
     ; Abrir archivo original en modo solo lectura
                           lea            dx, filename
+                          mov            ax, 3D00H
                           push           dx
-                          call           modo_lecturaP
+                          push           ax
+                          call           abrir_archivoP
+
+
                           jc             puente_no_existe
                           mov            handle, ax
     
@@ -384,10 +390,11 @@ Codigo Segment
 
     ; Cerrar archivo de origen
                           mov            bx, handle
-                          mov            ah, 3Eh
-                          int            21h
+                          push           bx
+                          call           cerrar_archivoP
 
     ;Leer el buffer y buscar las cédulas
+                          mov            ax, len_archivo                     ; en caso que se haya perdido
                           mov            cx, ax
                           push           ax                                  ; guardar la cantidad de bytes leìdos
                           lea            si, buffer_lectura
@@ -493,9 +500,8 @@ Codigo Segment
                                                     
     ; Crear archivo temporal
                           lea            dx, temp_file
-                          mov            cx, 0
-                          mov            ah, 3Ch
-                          int            21h
+                          push           dx
+                          call           crear_archivoP
                           jc             puente_error
                           mov            handle_temp, ax
     ; escribir out_buffer en temp.txt
@@ -508,8 +514,8 @@ Codigo Segment
 
     ; Cerrar archivo temporal
                           mov            bx, handle_temp
-                          mov            ah, 3Eh
-                          int            21h
+                          push           bx
+                          call           cerrar_archivoP
    
     ;borrar archivo original y renombrar temporal
                           lea            dx, filename
@@ -523,15 +529,18 @@ Codigo Segment
                           mov            di, offset filename
                           mov            ah,56h                              ;renombrar archivo temp a empleado
                           int            21h
-                            
-                          lea            dx, msg_eliminado
-                          push           dx
-                          call           print_string
-
+                          
+    ; verificar si es iteración de modificar
                           lea            si, buf_opcion
                           mov            bl, [si+2]
                           cmp            bl, '3'
                           je             siga_modificar
+    
+
+                          lea            dx, msg_eliminado
+                          push           dx
+                          call           print_string
+
 
                           jmp            menu_principal
     puente_error:         
@@ -551,7 +560,10 @@ Codigo Segment
     ; Abrir el archivo y mover el cursor al final
                           lea            dx, filename
                           mov            ax, 3D02h
-                          int            21h
+                          push           dx
+                          push           ax
+                          call           abrir_archivoP
+
                           mov            handle, ax
                           jmp            mover_al_final
     siga_modificar2:      
@@ -561,9 +573,9 @@ Codigo Segment
                           call           WaitKeyP
     ; cerrrar el archivo
                           mov            bx, handle
-                          mov            ah, 3Eh
-                          int            21h
-                          
+                          push           bx
+                          call           cerrar_archivoP
+
                           jmp            menu_principal
 
                             

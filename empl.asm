@@ -2,7 +2,7 @@
 ;Libreria de procedimientos para Programa basico de un CRUD de tarjetas de empleados
 include macroPP.asm
 
-public ClearScreenP, GotoXYP, WaitKeyP, print_string, input_string, write_char, write_field_from_buffer, escribir_en_archivo, input_buffers, vaciar_buffer, cerrar_archivoP, leer_bytesP, crear_archivoP, modo_lecturaP
+public ClearScreenP, GotoXYP, WaitKeyP, print_string, input_string, write_char, write_field_from_buffer, escribir_en_archivo, input_buffers, vaciar_buffer, cerrar_archivoP, crear_archivoP, abrir_archivoP
 
 Procedimientos Segment
 
@@ -94,7 +94,7 @@ escribir_en_archivo PROC FAR
                             push  bx
                             push  dx
                             call  write_char
-                            retf  2
+                            retf  4
 escribir_en_archivo endp
 
     ; imprime mensajes y sive para intrudcir datos
@@ -126,28 +126,40 @@ vaciar_buffer PROC FAR
 vaciar_buffer ENDP
 
     ; crear archivo
+    ; 4[bp] : nombre del archivo
 crear_archivoP PROC far
-                            retf
-crear_archivoP endp
-
-    ; abrir achivo en modo lectura
-modo_lecturaP PROC far
                             mov   bp, sp
                             mov   dx, 4[bp]
-                            mov   ax, 3D00h
+                            mov   cx, 0
+                            mov   ah, 3Ch
                             int   21h
-                            xor   bp,bp
-                            retf
-modo_lecturaP endp
 
-    ; Leer la cantidad de bytes y mandar informaciòn a buffer_lectura
-leer_bytesP PROC far
-                            retf
-leer_bytesP endp
+                            retf  2
+crear_archivoP endp
+
+    ; abrir achivo según su modo
+    ; 6[bp] : offset del nombre del archivo
+    ; 4[bp] : còdigo para el modo de abrir el archivo
+abrir_archivoP PROC far
+                            mov   bp, sp
+                            mov   dx, 6[bp]
+                            mov   ax, 4[bp]
+                            int   21h
+
+                            retf  4
+abrir_archivoP endp
+
+
     ; cerrar archivo
+    ; 4[bp] : handle del archivo
 cerrar_archivoP PROC far
-                            retf
+                            mov   bx, 4[bp]
+                            mov   ah, 3Eh
+                            int   21h
+                            retf  2
 cerrar_archivoP endp
+
+
 
 Procedimientos ENDS
 End
