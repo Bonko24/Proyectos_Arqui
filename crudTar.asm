@@ -4,7 +4,7 @@
 ;includes
 include macroPP.asm
 ;procedimientos
-extrn ClearScreenP:Far, GotoXYP:Far, WaitKeyP:Far, print_string:Far, input_string:Far, write_comma:Far, write_backSlash:Far, write_field_from_buffer:FAR
+extrn ClearScreenP:Far, GotoXYP:Far, WaitKeyP:Far, print_string:Far, input_string:Far, write_char:Far, write_field_from_buffer:FAR, escribir_en_archivo:far
 
 Pila Segment
          db 100 Dup ('?')
@@ -198,55 +198,43 @@ Codigo Segment
     ; Verificar que handle sea válido (bx = handle)
     ; Escribir empresa
                           mov    bx, handle
-                          
+
                           lea    si, buf_empresa
-                          pushA
-                          call   write_field_from_buffer
-                          popA
-                          push   bx
                           mov    dx,offset coma
+                          push   si
                           push   dx
-                          call   write_comma
+                          call   escribir_en_archivo
+        
 
                           lea    si, buf_nombre
-                          pushA
-                          call   write_field_from_buffer
-                          popA
-                          push   bx
                           mov    dx,offset coma
+                          push   si
                           push   dx
-                          call   write_comma
+                          call   escribir_en_archivo
 
                           lea    si, buf_cedula
-                          pushA
-                          call   write_field_from_buffer
-                          popA
-                          push   bx
                           mov    dx,offset coma
+                          push   si
                           push   dx
-                          call   write_comma
+                          call   escribir_en_archivo
+
                           jmp    short siga_agregar
     puenteErrorArchivo1:  
                           jmp    puenteErrorArchivo
 
     siga_agregar:         
                           lea    si, buf_telefono
-                          pushA
-                          call   write_field_from_buffer
-                          popA
-                          push   bx
                           mov    dx,offset coma
+                          push   si
                           push   dx
-                          call   write_comma
+                          call   escribir_en_archivo
 
                           lea    si, buf_email
-                          pushA
-                          call   write_field_from_buffer
-                          popA
-                          push   bx
                           mov    dx,offset separacion
+                          push   si
                           push   dx
-                          call   write_backSlash
+                          call   escribir_en_archivo
+                          
                           jmp    short siga
 
     puenteAgregarEmpleado:
