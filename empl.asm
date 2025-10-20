@@ -160,8 +160,8 @@ cerrar_archivoP PROC far
 cerrar_archivoP endp
 
     ; reemplazo de la macro input_buffersM
-    ; 8[bp]: direccion del mensaje (msg_...)
-    ; 6[bp]: direccion del buffer (buf_...)
+    ; 8[bp]: Mensaje
+    ; 6[bp]: buffer
 input_bufferP PROC FAR
                             mov   bp, sp
                             
