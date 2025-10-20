@@ -349,7 +349,6 @@ Codigo Segment
     fin_lectura:          
                           mov            bx, handle
                           push           bx
-                          call           cerrar_archivoP
                           jmp            cerrar_archivo
 
     puenteSalir1:         
