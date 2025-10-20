@@ -1,4 +1,13 @@
 ; MACROS DEL PROYECTO CRUD
+input_buffersM Macro mensaje, buffer
+                   lea  dx, mensaje
+                   push dx
+                   call print_string
+                   lea  dx, buffer
+                   push dx
+                   call input_string
+ENDM
+
 
 ;---Macros para realizar pushAll, popAll---
 ListPush Macro lista
