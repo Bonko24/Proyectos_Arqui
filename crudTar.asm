@@ -90,6 +90,7 @@ Codigo Segment
                           mov            cont_slash,0
                           mov            len_empleado,0
                           mov            found, 0
+                          mov            cont_aux,0
 
                           lea            dx, menu_msg
                           push           dx
@@ -409,7 +410,7 @@ Codigo Segment
                           lea            dx, msg_not_found
                           push           dx
                           call           print_string
-                          jmp            menu_principal
+                          jmp            cerrar_archivo
     siga_pop:             
                           pop            si                                  ; recuerar el puntero para lodsb
                           mov            cont_aux, 0                         ; reinicar el contador auxiliar
