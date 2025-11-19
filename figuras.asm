@@ -262,11 +262,42 @@ puenteRellenas1:
         sub columna,1                                                                               ;avanzar un espacio a la derecha
         pop cx                                                                                      ;recuperar el contador
         loop triangulo3
+
+        ;Lineas de relleno diagonales
+        mov fila,106                                                                                 ;fila inicial
+        mov columna,145                                                                              ;columna inicial
+        mov cx,48                                                                                    ;cuantas veces se ejecutara la linea
+
+        triangulo4:
+        push cx                                                                                      ;almacenar el contador
+        mov cx,columna                                                                               ;columna
+        mov dx,fila                                                                                  ;fila
+        call Color4                                                                                  ;llamar a pintar
+        sub columna,1                                                                                ;avanzar un espacio a la derecha
+        add fila,2                                                                                   ;avanzar un espacio abajo   
+        pop cx                                                                                       ;recuperar el contador
+        loop triangulo4
+
+        mov fila,106                                                                                 ;fila inicial
+        mov columna,145                                                                              ;columna inicial
+        mov cx,48                                                                                    ;cuantas veces se ejecutara la linea
+
+        triangulo5:
+        push cx                                                                                      ;almacenar el contador
+        mov cx,columna                                                                               ;columna
+        mov dx,fila                                                                                  ;fila
+        call Color4                                                                                  ;llamar a pintar
+        add fila,2                                                                                   ;avanzar un espacio arriba
+        add columna,1                                                                                ;avanzar un espacio a la derecha
+        pop cx                                                                                       ;recuperar el contador
+        loop triangulo5
+
+
         jmp short puenteFin
 
 
 
-;----------------------------------------------------------------------------------------------------------------------------------------
+;------------------------------------------------------------------RELLENAS----------------------------------------------------------------------
         Rellenas:
         ;modo grafico
         mov ax,0012h                                                                                ;modo grafico
