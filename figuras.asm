@@ -136,7 +136,7 @@ puenteRellenas:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color2                                                                                 ;llamar a pintar
         add columna,1                                                                               ;avanzar un espacio a la derecha
         pop cx                                                                                      ;recuperar el contador
         loop rectangulo
@@ -147,7 +147,7 @@ puenteRellenas:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color2                                                                                 ;llamar a pintar
         add fila,1                                                                                  ;avanzar un espacio abajo   
         pop cx                                                                                      ;recuperar el contador
         loop rectangulo2
@@ -157,7 +157,7 @@ puenteRellenas:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color2                                                                                 ;llamar a pintar
         add columna,1                                                                               ;avanzar un espacio a la derecha
         pop cx                                                                                      ;recuperar el contador
         loop rectangulo3
@@ -167,7 +167,7 @@ puenteRellenas:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color2                                                                                 ;llamar a pintar
         sub fila,1                                                                                  ;avanzar un espacio arriba
         pop cx                                                                                      ;recuperar el contador
         loop rectangulo4
@@ -181,7 +181,7 @@ puenteRellenas:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color3                                                                                 ;llamar a pintar
         sub columna,1                                                                               ;avanzar un espacio a la derecha
         add fila,1
         pop cx                                                                                      ;recuperar el contador
@@ -192,7 +192,7 @@ puenteRellenas:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color3                                                                                 ;llamar a pintar
         add columna,1
         add fila,1                                                                                  ;avanzar un espacio abajo   
         pop cx                                                                                      ;recuperar el contador
@@ -203,7 +203,7 @@ puenteRellenas:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color3                                                                                 ;llamar a pintar
         add columna,1                                                                               ;avanzar un espacio a la derecha
         sub fila,1                                                                                  ;avanzar un espacio arriba
         pop cx                                                                                      ;recuperar el contador
@@ -214,7 +214,7 @@ puenteRellenas:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color3                                                                                 ;llamar a pintar
         sub fila,1                                                                                  ;avanzar un espacio arriba
         sub columna,1                                                                               ;avanzar un espacio a la izquierda
         pop cx                                                                                      ;recuperar el contador
@@ -234,7 +234,7 @@ puenteRellenas1:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color4                                                                                 ;llamar a pintar
         sub columna,1                                                                               ;avanzar un espacio a la derecha
         add fila,2                                                                                  ;avanzar un espacio abajo   
         pop cx                                                                                      ;recuperar el contador
@@ -245,7 +245,7 @@ puenteRellenas1:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color4                                                                                 ;llamar a pintar
         add columna,1
         pop cx                                                                                      ;recuperar el contador
         loop triangulo2
@@ -255,7 +255,7 @@ puenteRellenas1:
         push cx                                                                                     ;almacenar el contador
         mov cx,columna                                                                              ;columna
         mov dx,fila                                                                                 ;fila
-        call Color1                                                                                 ;llamar a pintar
+        call Color4                                                                                 ;llamar a pintar
         sub fila,2                                                                                  ;avanzar un espacio arriba
         sub columna,1                                                                               ;avanzar un espacio a la derecha
         pop cx                                                                                      ;recuperar el contador
