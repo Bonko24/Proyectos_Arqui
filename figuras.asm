@@ -61,6 +61,8 @@ Codigo Segment
     pushA
     call ReadKey
     pop word ptr op
+    pop bx
+    xor bx,bx
     
 
     ;procesar opcion
@@ -331,8 +333,6 @@ puenteFin:
         ;------------------------------------valores para rombo------------------------------------
         mov fila,120                                                                                ;fila inicial
         mov columna,177                                                                             ;columna inicial
-        ;mov ancho,25                                                                                ;ancho del rombo
-        ;mov alto,25                                                                                 ;alto del rombo
         mov cx,25                                                                                   ;cuantas veces se ejecutara la linea
         mov ax,1
         push ax
@@ -362,6 +362,117 @@ puenteFin:
         cmp ax,25
         jne contador2
 
+        ;rombo 2 (terminar relleno)
+        mov fila,121                                                                                ;fila inicial
+        mov columna,177                                                                             ;columna inicial
+        mov cx,25
+        mov ax,1
+        push ax
+        mov acc,0
+        jmp short romboR2
+
+        contador3:
+        mov fila,121                                                                                ;fila inicial
+        mov columna,177                                                                             ;columna inicial
+        mov cx,25
+        mov bx,acc
+        add fila,bx
+        add columna,bx
+        push ax
+        romboR2:
+        push cx                                                                                     ;almacenar el contador
+        mov cx,columna                                                                              ;columna
+        mov dx,fila                                                                                 ;fila
+        call Color3                                                                                 ;llamar a pintar
+        sub columna,1                                                                               ;avanzar un espacio a la derecha
+        add fila,1
+        pop cx                                                                                      ;recuperar el contador
+        loop romboR2
+        pop ax
+        inc ax
+        add acc,1
+        cmp ax,25
+        jne contador3
+
+        
+        ;------------------------------------valores para triangulo------------------------------------
+        mov fila,201                                                                                ;fila inicial
+        mov columna,97                                                                              ;columna inicial
+        mov cx,97                                                                                   ;cuantas veces se ejecutara la linea
+        mov ax,1
+        push ax
+        mov acc,0
+        jmp short trianguloR
+        
+
+        contador4:
+        mov fila,201                                                                                ;fila inicial
+        mov columna,97                                                                              ;columna inicial
+        mov cx,97                                                                                   ;cuantas veces se ejecutara la 
+        mov bx,acc                                                                                  
+        sub fila,bx                                                                                 ;subir una fila
+        sub fila,bx                                                                                 ;subir una fila
+        add columna,bx                                                                              ;avanzar una columna a la derecha
+        sub cx,bx                                                                                   ;restar una repeticion
+        sub cx,bx                                                                                   ;restar una repeticion
+        push ax
+                                                                                          
+        trianguloR:
+        push cx                                                                                     ;almacenar el contador
+        mov cx,columna                                                                              ;columna
+        mov dx,fila                                                                                 ;fila
+        call Color4                                                                                 ;llamar a pintar
+        add columna,1
+        pop cx                                                                                      ;recuperar el contador
+        loop trianguloR
+        pop ax
+        inc ax
+        add acc,1
+        cmp ax,49
+        jne contador4
+
+        mov fila,105                                                                                ;fila inicial
+        mov columna,145                                                                             ;columna inicial
+        mov cx,columna
+        mov dx,fila
+        call Color4
+
+        ;triangulo2 (terminar relleno)
+        mov fila,200                                                                                ;fila inicial
+        mov columna,97                                                                              ;columna inicial
+        mov cx,97
+        mov ax,1
+        push ax
+        mov acc,0
+        jmp short trianguloR2
+        
+        contador5:
+        mov fila,200                                                                                ;fila inicial
+        mov columna,97                                                                              ;columna inicial
+        mov cx,97                                                                                   ;cuantas veces se ejecutara la 
+        mov bx,acc                                                                                  
+        sub fila,bx                                                                                 ;subir una fila
+        sub fila,bx                                                                                 ;subir una fila
+        add columna,bx                                                                              ;avanzar una columna a la derecha
+        sub cx,bx                                                                                   ;restar una repeticion
+        sub cx,bx                                                                                   ;restar una repeticion
+        push ax
+                                                                                        
+        trianguloR2:
+        push cx                                                                                     ;almacenar el contador
+        mov cx,columna                                                                              ;columna
+        mov dx,fila                                                                                 ;fila
+        call Color4                                                                                 ;llamar a pintar
+        add columna,1
+        pop cx                                                                                      ;recuperar el contador
+        loop trianguloR2
+        pop ax
+        inc ax
+        add acc,1
+        cmp ax,49
+        jne contador5
+
+        
         
         jmp short fin
 
