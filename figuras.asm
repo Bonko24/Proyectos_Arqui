@@ -89,7 +89,7 @@ Codigo Segment
     ;------------------------------------valores para cuadrado------------------------------------
                      mov           fila,85                         ;fila inicial
                      mov           columna,215                     ;columna inicial
-                     mov           cx,150                          ;cuantas veces se ejecutara la linea
+                     mov           cx,125                          ;cuantas veces se ejecutara la linea
 
     cuadrado:        
                      push          cx                              ;almacenar el contador
@@ -100,7 +100,7 @@ Codigo Segment
                      pop           cx                              ;recuperar el contador
                      loop          cuadrado
 
-                     mov           cx,150                          ;cuantas veces se ejecutara la linea
+                     mov           cx,125                          ;cuantas veces se ejecutara la linea
                      mov           columna,215                     ;columna inicial
     cuadrado2:       
                      push          cx                              ;almacenar el contador
@@ -111,7 +111,7 @@ Codigo Segment
                      pop           cx                              ;recuperar el contador
                      loop          cuadrado2
 
-                     mov           cx,150                          ;cuantas veces se ejecutara la linea
+                     mov           cx,125                          ;cuantas veces se ejecutara la linea
     cuadrado3:       
                      push          cx                              ;almacenar el contador
                      mov           cx,columna                      ;columna
@@ -121,7 +121,7 @@ Codigo Segment
                      pop           cx                              ;recuperar el contador
                      loop          cuadrado3
 
-                     mov           cx,150                          ;cuantas veces se ejecutara la linea
+                     mov           cx,125                          ;cuantas veces se ejecutara la linea
     cuadrado4:       
                      push          cx                              ;almacenar el contador
                      mov           cx,columna                      ;columna
@@ -237,7 +237,7 @@ Codigo Segment
     ;------------------------------------valores para triangulo------------------------------------
                      mov           fila,105                        ;fila inicial
                      mov           columna,145                     ;columna inicial
-                     mov           cx,48                           ;cuantas veces se ejecutara la linea
+                     mov           cx,42                           ;cuantas veces se ejecutara la linea
 
     triangulo:       
                      push          cx                              ;almacenar el contador
@@ -249,7 +249,7 @@ Codigo Segment
                      pop           cx                              ;recuperar el contador
                      loop          triangulo
 
-                     mov           cx,96                           ;cuantas veces se ejecutara la linea
+                     mov           cx,83                           ;cuantas veces se ejecutara la linea
     triangulo2:      
                      push          cx                              ;almacenar el contador
                      mov           cx,columna                      ;columna
@@ -259,7 +259,7 @@ Codigo Segment
                      pop           cx                              ;recuperar el contador
                      loop          triangulo2
 
-                     mov           cx,48                           ;cuantas veces se ejecutara la linea
+                     mov           cx,42                           ;cuantas veces se ejecutara la linea
     triangulo3:      
                      push          cx                              ;almacenar el contador
                      mov           cx,columna                      ;columna
@@ -273,7 +273,7 @@ Codigo Segment
     ;Lineas de relleno diagonales
                      mov           fila,106                        ;fila inicial
                      mov           columna,145                     ;columna inicial
-                     mov           cx,48                           ;cuantas veces se ejecutara la linea
+                     mov           cx,42                           ;cuantas veces se ejecutara la linea
 
     triangulo4:      
                      push          cx                              ;almacenar el contador
@@ -287,7 +287,7 @@ Codigo Segment
 
                      mov           fila,106                        ;fila inicial
                      mov           columna,145                     ;columna inicial
-                     mov           cx,48                           ;cuantas veces se ejecutara la linea
+                     mov           cx,42                           ;cuantas veces se ejecutara la linea
 
     triangulo5:      
                      push          cx                              ;almacenar el contador
@@ -433,7 +433,7 @@ Codigo Segment
     ;------------------------------------valores para cuadrado------------------------------------
                      mov           fila,85                         ;fila inicial
                      mov           columna,215                     ;columna inicial
-                     mov           cx,150                          ;cuantas veces se ejecutara la linea
+                     mov           cx,125                          ;cuantas veces se ejecutara la linea
                      mov           ax,1                            ;contador de lineas repetidas ejecutadas
                      push          ax
                      jmp           short cuadradoR
@@ -441,7 +441,7 @@ Codigo Segment
     contador:        
                      add           fila,1                          ;avanzar un espacio abajo
                      mov           columna,215                     ;columna inicial
-                     mov           cx,150                          ;cuantas veces se ejecutara la linea
+                     mov           cx,125                          ;cuantas veces se ejecutara la linea
                      push          ax
     cuadradoR:       
                      push          cx                              ;almacenar el contador
@@ -453,7 +453,7 @@ Codigo Segment
                      loop          cuadradoR
                      pop           ax                              ;recuperar el contador
                      inc           ax                              ;contador de lineas repetidas ejecutadas incrementado
-                     cmp           ax,150                          ;chequear si ya completo el cuadrado
+                     cmp           ax,125                          ;chequear si ya completo el cuadrado
                      jne           contador
                      jmp           short siga2
 
