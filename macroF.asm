@@ -1,4 +1,14 @@
 ;-------MACROS------
+EscribirPixel Macro fila,columna,color
+           mov             ah,0ch
+           mov             al,color                 ; color
+           xor             bh,bh                    ; página cero (la que se está viendo)
+           mov             cx,columna               ; columna
+           mov             dx,fila                  ; fila
+           int             10h
+EndM
+
+
 
 ;Inicio
 IniciaSegmentoDatos Macro SegDatos
