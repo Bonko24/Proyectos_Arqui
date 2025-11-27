@@ -554,9 +554,9 @@ Codigo Segment
 
         
     ;------------------------------------valores para triangulo------------------------------------
-                     mov           fila,201                        ;fila inicial
-                     mov           columna,97                      ;columna inicial
-                     mov           cx,97                           ;cuantas veces se ejecutara la linea
+                     mov           fila,190                        ;fila inicial
+                     mov           columna,100                     ;columna inicial
+                     mov           cx,87                           ;cuantas veces se ejecutara la linea*base
                      mov           ax,1
                      push          ax
                      mov           acc,0
@@ -564,9 +564,9 @@ Codigo Segment
         
 
     contador4:       
-                     mov           fila,201                        ;fila inicial
-                     mov           columna,97                      ;columna inicial
-                     mov           cx,97                           ;cuantas veces se ejecutara la
+                     mov           fila,190                        ;fila inicial
+                     mov           columna,100                     ;columna inicial
+                     mov           cx,87                           ;cuantas veces se ejecutara la*base
                      mov           bx,acc
                      sub           fila,bx                         ;subir una fila
                      sub           fila,bx                         ;subir una fila
@@ -586,28 +586,28 @@ Codigo Segment
                      pop           ax
                      inc           ax
                      add           acc,1
-                     cmp           ax,49
+                     cmp           ax,44                           ;*altura
                      jne           contador4
 
-                     mov           fila,105                        ;fila inicial
+                     mov           fila,133                        ;fila inicial
                      mov           columna,145                     ;columna inicial
                      mov           cx,columna
                      mov           dx,fila
                      call          Color4
 
     ;triangulo2 (terminar relleno)
-                     mov           fila,200                        ;fila inicial
-                     mov           columna,97                      ;columna inicial
-                     mov           cx,97
+                     mov           fila,189                        ;fila inicial
+                     mov           columna,100                     ;columna inicial
+                     mov           cx,87                           ;*base
                      mov           ax,1
                      push          ax
                      mov           acc,0
                      jmp           short trianguloR2
         
     contador5:       
-                     mov           fila,200                        ;fila inicial
-                     mov           columna,97                      ;columna inicial
-                     mov           cx,97                           ;cuantas veces se ejecutara la
+                     mov           fila,189                        ;fila inicial
+                     mov           columna,100                     ;columna inicial
+                     mov           cx,87                           ;cuantas veces se ejecutara la *base
                      mov           bx,acc
                      sub           fila,bx                         ;subir una fila
                      sub           fila,bx                         ;subir una fila
@@ -627,7 +627,7 @@ Codigo Segment
                      pop           ax
                      inc           ax
                      add           acc,1
-                     cmp           ax,49
+                     cmp           ax,44                           ;*altura
                      jne           contador5
 
         
