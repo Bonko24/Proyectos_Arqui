@@ -33,7 +33,7 @@ LineaHorizontalP Proc Far
                      loop   lineaH
 
                      xor    bp,bp
-                     retf   6
+                     retf   8
 LineaHorizontalP EndP
 
 LineaVerticalP Proc Far
@@ -51,7 +51,7 @@ LineaVerticalP Proc Far
                      loop   lineaV
 
                      xor    bp,bp
-                     retf   6
+                     retf   8
 
 LineaVerticalP EndP
 
