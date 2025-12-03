@@ -11,7 +11,7 @@
  ;DX: Fila, CX: Columna
 ;llamadas a procedimientos en proc.asm e include
 include macroF.asm
-extrn InicializarDS:Far, ClearScreenP:Far, WhereXYP:Far, GotoXYP:Far, PrintCharColorP:Far, PrintCharP:Far, PrintNum:Far, PrintString:Far, ReadKey:Far, WaitKeyP:Far, input_string:Far
+extrn InicializarDS:Far, ClearScreenP:Far, WhereXYP:Far, GotoXYP:Far, PrintCharColorP:Far, PrintCharP:Far, PrintNum:Far, PrintString:Far, ReadKey:Far, WaitKeyP:Far, input_string:Far, EscribirPixelP:Far, LineaHorizontalP:Far, LineaVerticalP:Far
 
 
 Pila Segment
@@ -82,9 +82,10 @@ Codigo Segment
                            cmp           al, '1'
                            je            Vacias
                            cmp           al, '2'
-                           je            puenteRellenas
+                           je            puenteRellenas0
                            jmp           menu
-
+    puenteRellenas0:       
+                           jmp           puenteRellenas
 
     Vacias:                
     ;modo grafico
@@ -95,46 +96,47 @@ Codigo Segment
                            mov           fila,85                         ;fila inicial
                            mov           columna,215                     ;columna inicial
                            mov           cx,125                          ;cuantas veces se ejecutara la linea
-
-    cuadrado:              
+                           
+    ;Linea Horizontal Superior
                            push          cx                              ;almacenar el contador
-                           mov           cx,columna                      ;columna
-                           mov           dx,fila                         ;fila
-                           call          Color1                          ;llamar a pintar
-                           add           columna,1                       ;avanzar un espacio a la derecha
-                           pop           cx                              ;recuperar el contador
-                           loop          cuadrado
+                           mov           ax, 0c09h                       ;Color y numero  interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          LineaHorizontalP                ;Linea horizontal superior
+                           pop           cx                              ;recuperar longitud de línea
 
-                           mov           cx,125                          ;cuantas veces se ejecutara la linea
-                           mov           columna,215                     ;columna inicial
-    cuadrado2:             
+    ; Linea vertical Izquierda
                            push          cx                              ;almacenar el contador
-                           mov           cx,columna                      ;columna
-                           mov           dx,fila                         ;fila
-                           call          Color1                          ;llamar a pintar
-                           add           fila,1                          ;avanzar un espacio abajo
-                           pop           cx                              ;recuperar el contador
-                           loop          cuadrado2
+                           mov           ax, 0c09h                       ;Color y numero  interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          LineaVerticalP
+                           pop           cx                              ;recuperar longitud de línea
 
-                           mov           cx,125                          ;cuantas veces se ejecutara la linea
-    cuadrado3:             
-                           push          cx                              ;almacenar el contador
-                           mov           cx,columna                      ;columna
-                           mov           dx,fila                         ;fila
-                           call          Color1                          ;llamar a pintar
-                           add           columna,1                       ;avanzar un espacio a la derecha
-                           pop           cx                              ;recuperar el contador
-                           loop          cuadrado3
+    ; Linea Horizontal Inferior
+                           mov           fila, 210
 
-                           mov           cx,125                          ;cuantas veces se ejecutara la linea
-    cuadrado4:             
                            push          cx                              ;almacenar el contador
-                           mov           cx,columna                      ;columna
-                           mov           dx,fila                         ;fila
-                           call          Color1                          ;llamar a pintar
-                           sub           fila,1                          ;avanzar un espacio arriba
-                           pop           cx                              ;recuperar el contador
-                           loop          cuadrado4
+                           mov           ax, 0c09h                       ;Color y numero  interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          LineaHorizontalP
+                           pop           cx
+
+    ; Linea vertical derecha
+                           inc           cx
+                           mov           fila,85
+                           mov           columna, 340
+                           push          cx                              ;almacenar el contador
+                           mov           ax, 0c09h                       ;Color y numero  interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          LineaVerticalP
+                           pop           cx                              ;recuperar longitud de línea
                            jmp           short siga
 
     puenteRellenas:        

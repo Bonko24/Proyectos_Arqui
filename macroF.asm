@@ -8,7 +8,19 @@ EscribirPixel Macro fila,columna,color
            int             10h
 EndM
 
-
+LineaHorizontal Macro
+local linea
+    linea:                                                            ;linea horizontal superior
+                           push          cx                              ;almacenar el contador
+                           mov           al,09h
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          EscribirPixelP
+                           add           columna,1                       ;avanzar un espacio a la derecha
+                           pop           cx                              ;recuperar el contador
+                           loop          linea 
+EndM
 
 ;Inicio
 IniciaSegmentoDatos Macro SegDatos

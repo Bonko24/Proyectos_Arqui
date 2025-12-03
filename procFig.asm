@@ -1,7 +1,62 @@
 ;Libreria de procedimientos
 Procedimientos Segment
+                     Assume cs:Procedimientos
     ;aca proc debe ser far
-    public InicializarDS, ClearScreenP, WhereXYP, GotoXYP, PrintCharColorP, PrintCharP, PrintNum, PrintString, ReadKey, WaitKeyP, input_string
+                     public InicializarDS, ClearScreenP, WhereXYP, GotoXYP, PrintCharColorP, PrintCharP, PrintNum, PrintString, ReadKey, WaitKeyP, input_string, EscribirPixelP, LineaHorizontalP, LineaVerticalP
+    ; Procedimientos del proyecto
+    ; Escirbe un pixel de algún color en la pizarra
+    ; Procedimiento de la interrupción 10,c para escrbir un pixel en la pantalla
+EscribirPixelP Proc Far
+                     mov    bp,sp
+                     mov    ax, 8[bp]                                                                                                                                                                                ; Color e interrupcion
+                     xor    bh,bh                                                                                                                                                                                    ; página cero (la que se está viendo)
+                     mov    cx,6[bp]                                                                                                                                                                                 ; columna
+                     mov    dx,4[bp]                                                                                                                                                                                 ; fila
+                     int    10h
+                     xor    bp,bp
+                     retf   6
+EscribirPixelP EndP
+
+    ; Dibujar una línea horiztal de la longitud solicitada pòr el usuario.
+LineaHorizontalP Proc Far
+                     mov    bp,sp
+                     mov    cx, 10[bp]
+    lineaH:          
+                     push   cx
+                     mov    ax, 8[bp]                                                                                                                                                                                ; Color e interrupcion
+                     xor    bh,bh                                                                                                                                                                                    ; página cero (la que se está viendo)
+                     mov    cx,6[bp]                                                                                                                                                                                 ; columna
+                     mov    dx,4[bp]                                                                                                                                                                                 ; fila
+                     int    10h
+                     add    6[bp],1
+                     pop    cx
+                     loop   lineaH
+
+                     xor    bp,bp
+                     retf   6
+LineaHorizontalP EndP
+
+LineaVerticalP Proc Far
+                     mov    bp,sp
+                     mov    cx, 10[bp]
+    lineaV:          
+                     push   cx
+                     mov    ax, 8[bp]                                                                                                                                                                                ; Color e interrupcion
+                     xor    bh,bh                                                                                                                                                                                    ; página cero (la que se está viendo)
+                     mov    cx,6[bp]                                                                                                                                                                                 ; columna
+                     mov    dx,4[bp]                                                                                                                                                                                 ; fila
+                     int    10h
+                     add    4[bp],1
+                     pop    cx
+                     loop   lineaV
+
+                     xor    bp,bp
+                     retf   6
+
+LineaVerticalP EndP
+
+
+
     ;---------------------------------------------------------
     ;antes de llamar al proc en el programa principal
     ;debe mandar en el ax el segmento de datos
@@ -10,13 +65,13 @@ Procedimientos Segment
     ;  push ax
     ;  call InicializarDS
     ;---------------------------------------------------------
-    InicializarDS Proc Far
-        xor    ax,ax
-        mov    bp,sp
-        mov    ax,4[bp]
-        mov    ds,ax
-        RetF
-    InicializarDS EndP
+InicializarDS Proc Far
+                     xor    ax,ax
+                     mov    bp,sp
+                     mov    ax,4[bp]
+                     mov    ds,ax
+                     RetF
+InicializarDS EndP
 
     ;---------------------------------------------------------
     ;antes de llamar al proc en el programa principal
@@ -31,12 +86,12 @@ Procedimientos Segment
     ;    pushA
     ;    call ClearScreenP
     ;---------------------------------------------------------
-    ClearScreenP Proc Far
-        mov    ah,07h
-        xor    al,al
-        int    10h
-        RetF   8*2
-    ClearScreenP EndP
+ClearScreenP Proc Far
+                     mov    ah,07h
+                     xor    al,al
+                     int    10h
+                     RetF   8*2
+ClearScreenP EndP
 
     ;---------------------------------------------------------
     ;antes de llamar al proc en el programa principal se debe
@@ -45,15 +100,15 @@ Procedimientos Segment
     ;despues del call un pop word ptr "var" para la fila y
     ;otro para la comlumna
     ;---------------------------------------------------------
-    WhereXYP Proc Far
-        mov    ah,03h
-        xor    bh,bh
-        mov    bp,sp
-        int    10h
-        mov    6[bp],dh                                                                                                                                                                                                                                              ;poner en "fila" el valor de la fila retornado
-        mov    4[bp],dl                                                                                                                                                                                                                                              ;poner en "columna" el valor de la columna retornado
-        RetF
-    WhereXYP EndP
+WhereXYP Proc Far
+                     mov    ah,03h
+                     xor    bh,bh
+                     mov    bp,sp
+                     int    10h
+                     mov    6[bp],dh                                                                                                                                                                                 ;poner en "fila" el valor de la fila retornado
+                     mov    4[bp],dl                                                                                                                                                                                 ;poner en "columna" el valor de la columna retornado
+                     RetF
+WhereXYP EndP
 
     ;---------------------------------------------------------
     ;antes de llamar al proc en el programa principal se debe
@@ -62,35 +117,35 @@ Procedimientos Segment
     ;{ xor dx,dx
     ;  call GotoXYP
     ;---------------------------------------------------------
-    GotoXYP Proc Far
-        mov    ah,02h
-        xor    bh,bh
-        int    10h
-        RetF
-    GotoXYP EndP
+GotoXYP Proc Far
+                     mov    ah,02h
+                     xor    bh,bh
+                     int    10h
+                     RetF
+GotoXYP EndP
 
     ;--------------------------------------------------------
     ;antes de llamar al proc en el programa principal se debe
     ;al= caracter a imprimir, bl= color del caracter,
     ;cx= cantidad de caracteres a imprimir (pasar por pila)
-    PrintCharColorP Proc Far
-        mov    ah,09h
-        xor    bh,bh
-        mov    cx,4[bp]
-        int    10h
-        RetF
-    PrintCharColorP EndP
+PrintCharColorP Proc Far
+                     mov    ah,09h
+                     xor    bh,bh
+                     mov    cx,4[bp]
+                     int    10h
+                     RetF
+PrintCharColorP EndP
 
     ;--------------------------------------------------------
     ;antes de llamar al proc en el programa principal se debe
     ;poner en el dl el caracter a imprimir
-    PrintCharP Proc Far
-        mov    bp,sp
-        mov    ah,02h
-        mov    dl,4[bp]
-        int    21h
-        RetF
-    PrintCharP EndP
+PrintCharP Proc Far
+                     mov    bp,sp
+                     mov    ah,02h
+                     mov    dl,4[bp]
+                     int    21h
+                     RetF
+PrintCharP EndP
 
     ;---------------------------------------------------------
     ;antes de llamar al proc en el programa principal
@@ -101,11 +156,11 @@ Procedimientos Segment
     ;    pushA
     ;    call PrintString
     ;---------------------------------------------------------
-    PrintString Proc Far
-        mov    ah,09h
-        int    21h
-        RetF   8*2
-    PrintString EndP
+PrintString Proc Far
+                     mov    ah,09h
+                     int    21h
+                     RetF   8*2
+PrintString EndP
 
     ;---------------------------------------------------------
     ;antes de llamar al proc en el programa principal se debe
@@ -113,14 +168,14 @@ Procedimientos Segment
     ;num debe venir en forma decimal, es decir con un signo ASCII
     ;ejem: 5 es un trebol, ya que el 5 de consola entra como 35h
     ;y eso nos da un 5 en decimal restandole 30h
-    PrintNum Proc Far
-        mov    bp,sp
-        mov    ah,02h
-        mov    dl,4[bp]
-        add    dl,30h
-        int    21h
-        RetF   2
-    PrintNum EndP
+PrintNum Proc Far
+                     mov    bp,sp
+                     mov    ah,02h
+                     mov    dl,4[bp]
+                     add    dl,30h
+                     int    21h
+                     RetF   2
+PrintNum EndP
 
     ;---------------------------------------------------------
     ;antes de llamar al proc en el programa principal se debe
@@ -135,29 +190,29 @@ Procedimientos Segment
     ;   pop word ptr num1
     ;   xor bp,bp
     ;---------------------------------------------------------
-    ReadKey Proc Far
-        mov    bp,sp
-        mov    ah,01h
-        int    21h
-        mov    12h[bp],al
-        RetF   7*2
-    ReadKey EndP
+ReadKey Proc Far
+                     mov    bp,sp
+                     mov    ah,01h
+                     int    21h
+                     mov    12h[bp],al
+                     RetF   7*2
+ReadKey EndP
 
     ;Espera a que se presione una tecla con echo
-    WaitKeyP Proc Far
-        mov    ah,01h
-        int    21h
-        RetF
-    WaitKeyP EndP
+WaitKeyP Proc Far
+                     mov    ah,01h
+                     int    21h
+                     RetF
+WaitKeyP EndP
 
     ;recibe una cadena de caracteres
-    input_string PROC Far
-        mov   bp,sp
-        mov   dx,[bp + 4]
-        mov   ah, 0Ah
-        int   21h
-        ret   2
-    input_string ENDP
+input_string PROC Far
+                     mov    bp,sp
+                     mov    dx,[bp + 4]
+                     mov    ah, 0Ah
+                     int    21h
+                     ret    2
+input_string ENDP
 
 
 Procedimientos EndS
