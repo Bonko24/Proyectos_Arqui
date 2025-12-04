@@ -144,7 +144,7 @@ Codigo Segment
               
     ;------------------------------------valores para rectangulo------------------------------------
     siga:                  
-    ; Linea Horizontal SUperior
+    ; Linea Horizontal Superior
                            mov           fila,55                          ;fila inicial
                            mov           columna,130                      ;columna inicial
                            mov           cx,165                           ;Longitud de la linea
@@ -202,7 +202,7 @@ Codigo Segment
                            push          fila
                            call          RomboDiagonalAscendenteP         ;Dibuja un línea diagonal ascendente
                            
-    ; Diagonal descendente derecha
+    ; Diagonal descendiente derecha
                            mov           cx,25                            ;longitud de la línea
 
                            push          cx
@@ -212,7 +212,7 @@ Codigo Segment
                            push          fila
                            call          RomboDiagonalDescendenteP        ;Dibuja un línea diagonal descendente
 
-    ; Diagonal descendete izquierda
+    ; Diagonal descendiente izquierda
                            mov           fila, 145                        ;fila inicial
                            mov           columna, 152                     ;columna inicial
                            mov           cx,25                            ;longitud de la línea
@@ -472,13 +472,12 @@ Codigo Segment
                            mov           cx,165
                            push          ax
     rectanguloR:           
-                           push          cx                               ;almacenar el contador
-                           mov           cx,columna                       ;columna
-                           mov           dx,fila                          ;fila
-                           call          Color2                           ;llamar a pintar
-                           add           columna,1                        ;avanzar un espacio a la derecha
-                           pop           cx                               ;recuperar el contador
-                           loop          rectanguloR
+                           push          cx
+                           mov           ax, 0c08h                        ;Color y numero de interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          LineaHorizontalP                 ;Dibuja un línea horizonal
                            pop           ax                               ;recuperar el contador
                            inc           ax
                            cmp           ax,50
@@ -490,7 +489,7 @@ Codigo Segment
                            mov           cx,25                            ;cuantas veces se ejecutara la linea
                            mov           ax,1
                            push          ax
-                           mov           acc,0
+                           mov           acc,0                            ;Variable encargada de rellenar el rombo
                            jmp           short romboR
         
     contador2:             
@@ -502,21 +501,19 @@ Codigo Segment
                            add           columna,bx
                            push          ax
     romboR:                
-                           push          cx                               ;almacenar el contador
-                           mov           cx,columna                       ;columna
-                           mov           dx,fila                          ;fila
-                           call          Color3                           ;llamar a pintar
-                           sub           columna,1                        ;avanzar un espacio a la derecha
-                           add           fila,1
-                           pop           cx                               ;recuperar el contador
-                           loop          romboR
+                           push          cx
+                           mov           ax, 0c06h                        ;Color y numero de interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          RomboDiagonalAscendenteP         ;Dibuja un línea diagonal ascendente
                            pop           ax                               ;recuperar el contador
                            inc           ax
-                           add           acc,1
+                           inc           acc
                            cmp           ax,25
                            jne           contador2
 
-    ;rombo 2 (terminar relleno)
+    ;Terminar de rellenar el rombo
                            mov           fila,121                         ;fila inicial
                            mov           columna,177                      ;columna inicial
                            mov           cx,25
@@ -534,17 +531,15 @@ Codigo Segment
                            add           columna,bx
                            push          ax
     romboR2:               
-                           push          cx                               ;almacenar el contador
-                           mov           cx,columna                       ;columna
-                           mov           dx,fila                          ;fila
-                           call          Color3                           ;llamar a pintar
-                           sub           columna,1                        ;avanzar un espacio a la derecha
-                           add           fila,1
-                           pop           cx                               ;recuperar el contador
-                           loop          romboR2
+                           push          cx
+                           mov           ax, 0c06h                        ;Color y numero de interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          RomboDiagonalAscendenteP         ;Dibuja un línea diagonal ascendente
                            pop           ax
                            inc           ax
-                           add           acc,1
+                           inc           acc
                            cmp           ax,25
                            jne           contador3
 
@@ -552,7 +547,7 @@ Codigo Segment
     ;------------------------------------valores para triangulo------------------------------------
                            mov           fila,190                         ;fila inicial
                            mov           columna,100                      ;columna inicial
-                           mov           cx,87                            ;cuantas veces se ejecutara la linea*base
+                           mov           cx,86                            ;longitud de la línea
                            mov           ax,1
                            push          ax
                            mov           acc,0
@@ -562,7 +557,7 @@ Codigo Segment
     contador4:             
                            mov           fila,190                         ;fila inicial
                            mov           columna,100                      ;columna inicial
-                           mov           cx,87                            ;cuantas veces se ejecutara la*base
+                           mov           cx,86                            ;cuantas veces se ejecutara la*base
                            mov           bx,acc
                            sub           fila,bx                          ;subir una fila
                            sub           fila,bx                          ;subir una fila
@@ -572,29 +567,23 @@ Codigo Segment
                            push          ax
                                                                                           
     trianguloR:            
-                           push          cx                               ;almacenar el contador
-                           mov           cx,columna                       ;columna
-                           mov           dx,fila                          ;fila
-                           call          Color4                           ;llamar a pintar
-                           add           columna,1
-                           pop           cx                               ;recuperar el contador
-                           loop          trianguloR
+                           push          cx
+                           mov           ax, 0c05h                        ;Color y numero de interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          LineaHorizontalP                 ;Dibuja un línea horizontal
                            pop           ax
                            inc           ax
                            add           acc,1
-                           cmp           ax,44                            ;*altura
+                           cmp           ax,44                            ;Altura del triángulo
                            jne           contador4
 
-                           mov           fila,133                         ;fila inicial
-                           mov           columna,145                      ;columna inicial
-                           mov           cx,columna
-                           mov           dx,fila
-                           call          Color4
 
-    ;triangulo2 (terminar relleno)
+    ;Terminar de rellenar el triángulo
                            mov           fila,189                         ;fila inicial
                            mov           columna,100                      ;columna inicial
-                           mov           cx,87                            ;*base
+                           mov           cx,86                            ;longitud de la línea
                            mov           ax,1
                            push          ax
                            mov           acc,0
@@ -603,7 +592,7 @@ Codigo Segment
     contador5:             
                            mov           fila,189                         ;fila inicial
                            mov           columna,100                      ;columna inicial
-                           mov           cx,87                            ;cuantas veces se ejecutara la *base
+                           mov           cx,86                            ;cuantas veces se ejecutara la *base
                            mov           bx,acc
                            sub           fila,bx                          ;subir una fila
                            sub           fila,bx                          ;subir una fila
@@ -613,17 +602,16 @@ Codigo Segment
                            push          ax
                                                                                         
     trianguloR2:           
-                           push          cx                               ;almacenar el contador
-                           mov           cx,columna                       ;columna
-                           mov           dx,fila                          ;fila
-                           call          Color4                           ;llamar a pintar
-                           add           columna,1
-                           pop           cx                               ;recuperar el contador
-                           loop          trianguloR2
+                           push          cx
+                           mov           ax, 0c05h                        ;Color y numero de interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          LineaHorizontalP                 ;Dibuja un línea horizontal
                            pop           ax
                            inc           ax
                            add           acc,1
-                           cmp           ax,44                            ;*altura
+                           cmp           ax,44                            ;Altura del triángulo
                            jne           contador5
 
     ;------------------------------------valores para círculo relleno------------------------------------
