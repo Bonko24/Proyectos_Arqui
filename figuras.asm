@@ -9,7 +9,7 @@
 ;3) td figuras (debugear)  o  figuras (ejecutar)
 ;--------------------------------------------------------- 
  ;DX: Fila, CX: Columna
-;llamadas a procedimientos en proc.asm e include
+;llamadas a procedimientos en procFig.asm e include
 include macroF.asm
 extrn InicializarDS:Far, ClearScreenP:Far, WhereXYP:Far, GotoXYP:Far, PrintCharColorP:Far, PrintCharP:Far, PrintNum:Far, PrintString:Far, ReadKey:Far, WaitKeyP:Far, input_string:Far, EscribirPixelP:Far, LineaHorizontalP:Far, LineaVerticalP:Far, RomboDiagonalAscendenteP:Far,RomboDiagonalDescendenteP:Far, TrianguloDiagonalAscendenteP:Far, TrianguloDiagonalDescendenteP:far, LineaHorizontal2P:Far
 
@@ -23,18 +23,18 @@ Datos Segment
     errorOp       db 10,13,"Error: Opcion invalida, intente de nuevo",  10,13,  "Presione cualquier tecla...",24h
     op            db ?
 
-    fila          dw ?
-    columna       dw ?
-    ancho         dw ?
-    alto          dw ?
-    acc           dw ?
+    fila          dw ?                                                                                                                          ;fila del punto inicial
+    columna       dw ?                                                                                                                          ; columna del punto inicial
+    ancho         dw ?                                                                                                                          ; ancho de la base del triángulo
+    alto          dw ?                                                                                                                          ; alto del triángulo
+    acc           dw ?                                                                                                                          ; Contador acumulativo usado para desplazar lineas diagonalmente
 
-    x             dw ?
-    y             dw ?
-    xc            dw ?
-    yc            dw ?
-    p             dw ?
-    columna_final dw ?
+    x             dw ?                                                                                                                          ; coordenada x respucto al centro del círculo
+    y             dw ?                                                                                                                          ; coordenada y respecto al centro del círculo
+    xc            dw ?                                                                                                                          ; coordenada x del centro del círculo
+    yc            dw ?                                                                                                                          ; coordenada y del centro del círculo
+    p             dw ?                                                                                                                          ; indica si un punto está dentro o fuera del la circunferencia
+    columna_final dw ?                                                                                                                          ; punto final de una línea horizontal
 
 
 Datos EndS
@@ -59,12 +59,12 @@ Codigo Segment
                      xor           dx,dx                            ; poner en 0 dh y dl para redireccionar cursor a 0,0
                      call          GotoXYP                          ; redireccionar cursor a 0,0
 
-    ;mensaje
+    ;imprime el mensaje incial
                      lea           dx,mensaje
                      pushA
                      call          PrintString
 
-    ;leer opcion
+    ;leer opcion del ususario
                      push          word ptr op
                      pushA
                      call          ReadKey
@@ -73,7 +73,7 @@ Codigo Segment
                      xor           bx,bx
     
 
-    ;procesar opcion
+    ;procesar opcion del susuario
                      mov           al,op
                      cmp           al, '1'
                      je            Vacias
@@ -281,8 +281,8 @@ Codigo Segment
                      call          TrianguloDiagonalDescendenteP    ;Dibuja un línea diagonal descendente
 
     ; Lado Horizontal
-                     mov           fila, 189                        ; fila inicial
-                     mov           columna, 103
+                     mov           fila, 189                        ;Fila inicial
+                     mov           columna, 103                     ;Columna incial
                      mov           cx,84                            ;longitud del lado
                            
                      push          cx
@@ -293,15 +293,15 @@ Codigo Segment
                      call          LineaHorizontalP                 ;Dibuja un línea horizontal
 
     ;------------------------------------valores para círculo------------------------------------
+    ;Se utiliza el algoritmo de punto medio del circulo, el cìrculo se divide en octantes y solo debe averiguarse las coordenadas de uno para tener las de los demás
                      mov           x, 0
-                     mov           y, 50                            ; y =  radio
-                     mov           p, -49                           ; p = 1 - radio
+                     mov           y, 50                            ;y =  radio
+                     mov           p, -49                           ;p = 1 - radio
                      mov           xc, 170
                      mov           yc, 215
-                     mov           columna,0
-                     mov           fila,0
+
     bucle_circulo:   
-    ; Condición del bucle: x <= y
+    ;Condición del bucle: x <= y
                      mov           ax,x
                      cmp           ax,y
                      jg            puente_circulo
@@ -309,7 +309,7 @@ Codigo Segment
     puente_circulo:  
                      jmp           fin_circulo
     dibujar_octantes:
-    ; Octante 1: (xc+x,yc+y)
+    ;Octante 1: Dibuja un punto en las coordenadas (xc+x,yc+y)
                      xor           ax,ax
                      mov           ax,xc
                      add           ax,x
@@ -317,9 +317,14 @@ Codigo Segment
                      mov           ax,yc
                      add           ax,y
                      mov           columna,ax
-                     EscribirPixel fila, columna, 03h
 
-    ; Octante 2: (xc+y,yc+x)
+                     mov           ax, 0c03h
+                     push          ax
+                     push          columna
+                     push          fila
+                     call          EscribirPixelP
+
+    ;Octante 2: Dibuja un punto en las coordenadas  (xc+y,yc+x)
                      xor           ax,ax
                      mov           ax,xc
                      add           ax,y
@@ -327,9 +332,14 @@ Codigo Segment
                      mov           ax,yc
                      add           ax,x
                      mov           columna,ax
-                     EscribirPixel fila, columna, 03h
+                     
+                     mov           ax, 0c03h
+                     push          ax
+                     push          columna
+                     push          fila
+                     call          EscribirPixelP
 
-    ; Octante 3: (xc-y,yc+x)
+    ;Octante 3: Dibuja un punto en las coordenadas (xc-y,yc+x)
                      xor           ax,ax
                      mov           ax,xc
                      sub           ax,y
@@ -337,8 +347,13 @@ Codigo Segment
                      mov           ax,yc
                      add           ax,x
                      mov           columna,ax
-                     EscribirPixel fila, columna, 03h
-    ; Octante 4: (xc-x,yc+y)
+                     
+                     mov           ax, 0c03h
+                     push          ax
+                     push          columna
+                     push          fila
+                     call          EscribirPixelP
+    ;Octante 4: Dibuja un punto en las coordenadas (xc-x,yc+y)
                      xor           ax,ax
                      mov           ax,xc
                      sub           ax,x
@@ -348,7 +363,7 @@ Codigo Segment
                      mov           columna,ax
                      EscribirPixel fila, columna, 03h
                      
-    ; Octante 5: (xc-x,yc-y)
+    ;Octante 5: Dibuja un punto en las coordenadas (xc-x,yc-y)
                      xor           ax,ax
                      mov           ax,xc
                      sub           ax,x
@@ -356,9 +371,14 @@ Codigo Segment
                      mov           ax,yc
                      sub           ax,y
                      mov           columna,ax
-                     EscribirPixel fila, columna, 03h
+                     
+                     mov           ax, 0c03h
+                     push          ax
+                     push          columna
+                     push          fila
+                     call          EscribirPixelP
 
-    ; Octante 6: (xc-y,yc-x)
+    ;Octante 6: Dibuja un punto en las coordenadas (xc-y,yc-x)
                      xor           ax,ax
                      mov           ax,xc
                      sub           ax,y
@@ -366,9 +386,14 @@ Codigo Segment
                      mov           ax,yc
                      sub           ax,x
                      mov           columna,ax
-                     EscribirPixel fila, columna, 03h
+                     
+                     mov           ax, 0c03h
+                     push          ax
+                     push          columna
+                     push          fila
+                     call          EscribirPixelP
 
-    ; Octante 7: (xc+y,yc-x)
+    ;Octante 7: Dibuja un punto en las coordenadas (xc+y,yc-x)
                      xor           ax,ax
                      mov           ax,xc
                      add           ax,y
@@ -376,8 +401,13 @@ Codigo Segment
                      mov           ax,yc
                      sub           ax,x
                      mov           columna,ax
-                     EscribirPixel fila, columna, 03h
-    ; Octante 8: (xc+x,yc-y)
+                     
+                     mov           ax, 0c03h
+                     push          ax
+                     push          columna
+                     push          fila
+                     call          EscribirPixelP
+    ;Octante 8: Dibuja un punto en las coordenadas (xc+x,yc-y)
                      xor           ax,ax
                      mov           ax,xc
                      add           ax,x
@@ -385,22 +415,27 @@ Codigo Segment
                      mov           ax,yc
                      sub           ax,y
                      mov           columna,ax
-                     EscribirPixel fila, columna, 03h
+                     
+                     mov           ax, 0c03h
+                     push          ax
+                     push          columna
+                     push          fila
+                     call          EscribirPixelP
 
-    ; Actualización de variables
+    ;Actualización de variables
                      inc           x                                ; x +=1
                      cmp           p,0
                      jg            positivo
 
-    ; Caso p <= 0: p += 2x+1
+    ;Caso p <= 0: p += 2x+1
                      mov           ax, x
                      shl           ax,1
                      inc           ax
                      add           p, ax                            ; p += 2x+1
                      jmp           bucle_circulo
-    
+
+    ;Caso p > 0: p += 2*(x-y) + 1, y-=1
     positivo:        
-    ; Caso p > 0: p += 2*(x-y)+1
                      mov           ax,x
                      sub           ax,y
                      mov           bl,2
@@ -426,7 +461,7 @@ Codigo Segment
     ;------------------------------------valores para cuadrado------------------------------------
                      mov           fila,85                          ;fila inicial
                      mov           columna,215                      ;columna inicial
-                     mov           cx,125                           ;cuantas veces se ejecutara la linea
+                     mov           cx,125                           ;longitud de la línea
                      mov           ax,1                             ;contador de lineas repetidas ejecutadas
                      push          ax
                      jmp           short cuadradoR
@@ -457,7 +492,7 @@ Codigo Segment
     ;------------------------------------valores para rectangulo------------------------------------
                      mov           fila,55                          ;fila inicial
                      mov           columna,130                      ;columna inicial
-                     mov           cx,165                           ;cuantas veces se ejecutara la linea
+                     mov           cx,165                           ;longitud de la línea
                      mov           ax,1
                      push          ax
                      jmp           short rectanguloR
@@ -469,7 +504,7 @@ Codigo Segment
                      push          ax
     rectanguloR:     
                      push          cx
-                     mov           ax, 0c08h                        ;Color y numero de interupcion
+                     mov           ax, 0c08h                        ;Color y numero de interrupcion
                      push          ax
                      push          columna
                      push          fila
@@ -482,7 +517,7 @@ Codigo Segment
     ;------------------------------------valores para rombo------------------------------------
                      mov           fila,120                         ;fila inicial
                      mov           columna,177                      ;columna inicial
-                     mov           cx,25                            ;cuantas veces se ejecutara la linea
+                     mov           cx,25                            ;longitud de la línea
                      mov           ax,1
                      push          ax
                      mov           acc,0                            ;Variable encargada de rellenar el rombo
@@ -498,7 +533,7 @@ Codigo Segment
                      push          ax
     romboR:          
                      push          cx
-                     mov           ax, 0c06h                        ;Color y numero de interupcion
+                     mov           ax, 0c06h                        ;Color y numero de interrupcion
                      push          ax
                      push          columna
                      push          fila
@@ -528,7 +563,7 @@ Codigo Segment
                      push          ax
     romboR2:         
                      push          cx
-                     mov           ax, 0c06h                        ;Color y numero de interupcion
+                     mov           ax, 0c06h                        ;Color y numero de interrupcion
                      push          ax
                      push          columna
                      push          fila
@@ -553,7 +588,7 @@ Codigo Segment
     contador4:       
                      mov           fila,190                         ;fila inicial
                      mov           columna,100                      ;columna inicial
-                     mov           cx,86                            ;cuantas veces se ejecutara la*base
+                     mov           cx,86                            ;longitud de la base del triángulo
                      mov           bx,acc
                      sub           fila,bx                          ;subir una fila
                      sub           fila,bx                          ;subir una fila
@@ -564,7 +599,7 @@ Codigo Segment
                                                                                           
     trianguloR:      
                      push          cx
-                     mov           ax, 0c05h                        ;Color y numero de interupcion
+                     mov           ax, 0c05h                        ;Color y numero de interrupcion
                      push          ax
                      push          columna
                      push          fila
@@ -574,7 +609,6 @@ Codigo Segment
                      add           acc,1
                      cmp           ax,44                            ;Altura del triángulo
                      jne           contador4
-
 
     ;Terminar de rellenar el triángulo
                      mov           fila,189                         ;fila inicial
@@ -588,7 +622,7 @@ Codigo Segment
     contador5:       
                      mov           fila,189                         ;fila inicial
                      mov           columna,100                      ;columna inicial
-                     mov           cx,86                            ;cuantas veces se ejecutara la *base
+                     mov           cx,86                            ;longitud de la base del triángulo
                      mov           bx,acc
                      sub           fila,bx                          ;subir una fila
                      sub           fila,bx                          ;subir una fila
@@ -599,7 +633,7 @@ Codigo Segment
                                                                                         
     trianguloR2:     
                      push          cx
-                     mov           ax, 0c05h                        ;Color y numero de interupcion
+                     mov           ax, 0c05h                        ;Color y numero de interrupcion
                      push          ax
                      push          columna
                      push          fila
@@ -611,6 +645,7 @@ Codigo Segment
                      jne           contador5
 
     ;------------------------------------valores para círculo relleno------------------------------------
+    ;Utilizando el algortitmo de punto medio, se conectan en cuatro líneas horizontales cada coordenada de los octantes con su coordeanda espejo
                      mov           x, 0
                      mov           y, 50                            ; y =  radio
                      mov           p, -49                           ; p = 1 - radio
@@ -638,12 +673,12 @@ Codigo Segment
                      add           ax,y
                      mov           columna_final,ax
                            
-                     mov           ax, 0c03h                        ; Número de interrupción y color
+                     mov           ax, 0c03h                        ;Número de interrupción y color
                      push          ax
                      push          columna
                      push          fila
                      push          columna_final
-                     call          LineaHorizontal2P                ; dibuja una línea entre ambas columnas
+                     call          LineaHorizontal2P                ;dibuja una línea entre ambas columnas
 
     ; Línea 2: desde (xc-x, yc-y) hasta (xc-x, yc+y)
                      mov           ax,xc
@@ -710,7 +745,8 @@ Codigo Segment
                      inc           ax
                      add           p, ax
                      jmp           bucle_circuloR
-    
+
+    ; Caso p > 0: p +=2(x-y) + 1, y -=1
     positivoR:       
                      mov           ax,x
                      sub           ax,y

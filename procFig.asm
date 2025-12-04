@@ -5,8 +5,13 @@ Procedimientos Segment
                                   public InicializarDS, ClearScreenP, WhereXYP, GotoXYP, PrintCharColorP, PrintCharP, PrintNum, PrintString, ReadKey, WaitKeyP, input_string, EscribirPixelP, LineaHorizontalP, LineaVerticalP, RomboDiagonalAscendenteP, RomboDiagonalDescendenteP, TrianguloDiagonalAscendenteP, TrianguloDiagonalDescendenteP, LineaHorizontal2P
     
     ; Procedimientos del proyecto
-    ; Escirbe un pixel de algún color en la pizarra
-    ; Procedimiento de la interrupción 10,c para escrbir un pixel en la pantalla
+    ; Procedimiento de la interrupción 10h,c para escrbir un pixel en la pantalla
+    ; Ejemplo de uso
+    ;mov           ax, 0c03h -> ah:número de interrupción 10h y al: color
+    ;push          ax
+    ;push          columna
+    ;push          fila
+    ;call          EscribirPixelP
 EscribirPixelP Proc Far
                                   mov    bp,sp
                                   mov    ax, 8[bp]                                                                                                                                                                                                                                                                                                                     ; Color e interrupcion
@@ -18,7 +23,14 @@ EscribirPixelP Proc Far
                                   retf   6
 EscribirPixelP EndP
 
-    ; Dibujar una línea horizontal de la longitud solicitada pòr el usuario.
+    ; Dibujar una línea horizontal de la longitud solicitada por el usuario.
+    ; Ejmplo de uso:
+    ;push          cx            -> longitud de la línea
+    ;mov           ax, 0c05h     -> ah:número de interrupción 10h y al: color
+    ;push          ax
+    ;push          columna
+    ;push          fila
+    ;call          LineaHorizontalP
 LineaHorizontalP Proc Far
                                   mov    bp,sp
                                   mov    cx, 10[bp]
@@ -37,7 +49,14 @@ LineaHorizontalP Proc Far
                                   retf   8
 LineaHorizontalP EndP
 
-    ; Dibujar una línea horizontal de la longitud solicitada pòr el usuario.
+    ; Dibujar una línea horizontal de la longitud solicitada por el usuario.
+    ;Ejemplo de uso:
+    ;push          cx            -> longitud de la línea
+    ;mov           ax, 0c05h     -> ah:número de interrupción 10h y al: color
+    ;push          ax
+    ;push          columna
+    ;push          fila
+    ;call          LineaVerticalP
 LineaVerticalP Proc Far
                                   mov    bp,sp
                                   mov    cx, 10[bp]
@@ -58,6 +77,12 @@ LineaVerticalP Proc Far
 LineaVerticalP EndP
 
     ; Dibujar una línea diagonal ascendente para el Rombo
+    ;push          cx            -> longitud de la línea
+    ;mov           ax, 0c05h     -> ah:número de interrupción 10h y al: color
+    ;push          ax
+    ;push          columna
+    ;push          fila
+    ;call          RomboDiagonalAscendenteP
 RomboDiagonalAscendenteP proc far
                                   mov    bp,sp
                                   mov    cx, 10[bp]
@@ -78,6 +103,13 @@ RomboDiagonalAscendenteP proc far
 RomboDiagonalAscendenteP EndP
 
     ; Linea diagonal descendente para el rombo
+    ; Ejemplo de uso:
+    ;push          cx            -> longitud de la línea
+    ;mov           ax, 0c05h     -> ah:número de interrupción 10h y al: color
+    ;push          ax
+    ;push          columna
+    ;push          fila
+    ;call          RomboDiagonalDescendenteP
 RomboDiagonalDescendenteP proc far
                                   mov    bp,sp
                                   mov    cx, 10[bp]
@@ -97,6 +129,14 @@ RomboDiagonalDescendenteP proc far
                                   retf   8
 RomboDiagonalDescendenteP EndP
 
+    ; Dibuja una línea diagonal ascendente para el triángulo
+    ; Ejemplo de uso:
+    ;push          cx            -> longitud de la línea
+    ;mov           ax, 0c05h     -> ah:número de interrupción 10h y al: color
+    ;push          ax
+    ;push          columna
+    ;push          fila
+    ;call          TrianguloDiagonalAscendenteP
 TrianguloDiagonalAscendenteP proc far
                                   mov    bp,sp
                                   mov    cx, 10[bp]
@@ -116,6 +156,14 @@ TrianguloDiagonalAscendenteP proc far
                                   retf   8
 TrianguloDiagonalAscendenteP EndP
 
+    ; Dibuja una línea diagonal descendente para el triángulo
+    ; Ejemplo de uso:
+    ;push          cx            -> longitud de la línea
+    ;mov           ax, 0c05h     -> ah:número de interrupción 10h y al: color
+    ;push          ax
+    ;push          columna
+    ;push          fila
+    ;call          TrianguloDiagonalDescendenteP
 TrianguloDiagonalDescendenteP proc far
                                   mov    bp,sp
                                   mov    cx, 10[bp]
@@ -136,6 +184,13 @@ TrianguloDiagonalDescendenteP proc far
 TrianguloDiagonalDescendenteP EndP
 
     ; Dibujar una línea horizontal entre dos puntos
+    ; Ejmplo deuso:
+    ;mov           ax, 0c03h                        -> ah:número de interrupción 10h y al: color
+    ;push          ax
+    ;push          columna
+    ;push          fila
+    ;push          columna_final
+    ;call          LineaHorizontal2P
 LineaHorizontal2P Proc Far
                                   mov    bp,sp
     lineaH2:                      
