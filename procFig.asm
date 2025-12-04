@@ -1,59 +1,101 @@
 ;Libreria de procedimientos
 Procedimientos Segment
-                     Assume cs:Procedimientos
+                              Assume cs:Procedimientos
     ;aca proc debe ser far
-                     public InicializarDS, ClearScreenP, WhereXYP, GotoXYP, PrintCharColorP, PrintCharP, PrintNum, PrintString, ReadKey, WaitKeyP, input_string, EscribirPixelP, LineaHorizontalP, LineaVerticalP
+                              public InicializarDS, ClearScreenP, WhereXYP, GotoXYP, PrintCharColorP, PrintCharP, PrintNum, PrintString, ReadKey, WaitKeyP, input_string, EscribirPixelP, LineaHorizontalP, LineaVerticalP, RomboDiagonalAscendenteP, RomboDiagonalDescendenteP
+    
     ; Procedimientos del proyecto
     ; Escirbe un pixel de algún color en la pizarra
     ; Procedimiento de la interrupción 10,c para escrbir un pixel en la pantalla
 EscribirPixelP Proc Far
-                     mov    bp,sp
-                     mov    ax, 8[bp]                                                                                                                                                                                ; Color e interrupcion
-                     xor    bh,bh                                                                                                                                                                                    ; página cero (la que se está viendo)
-                     mov    cx,6[bp]                                                                                                                                                                                 ; columna
-                     mov    dx,4[bp]                                                                                                                                                                                 ; fila
-                     int    10h
-                     xor    bp,bp
-                     retf   6
+                              mov    bp,sp
+                              mov    ax, 8[bp]                                                                                                                                                                                                                                     ; Color e interrupcion
+                              xor    bh,bh                                                                                                                                                                                                                                         ; página cero (la que se está viendo)
+                              mov    cx,6[bp]                                                                                                                                                                                                                                      ; columna
+                              mov    dx,4[bp]                                                                                                                                                                                                                                      ; fila
+                              int    10h
+                              xor    bp,bp
+                              retf   6
 EscribirPixelP EndP
 
-    ; Dibujar una línea horiztal de la longitud solicitada pòr el usuario.
+    ; Dibujar una línea horizontal de la longitud solicitada pòr el usuario.
 LineaHorizontalP Proc Far
-                     mov    bp,sp
-                     mov    cx, 10[bp]
-    lineaH:          
-                     push   cx
-                     mov    ax, 8[bp]                                                                                                                                                                                ; Color e interrupcion
-                     xor    bh,bh                                                                                                                                                                                    ; página cero (la que se está viendo)
-                     mov    cx,6[bp]                                                                                                                                                                                 ; columna
-                     mov    dx,4[bp]                                                                                                                                                                                 ; fila
-                     int    10h
-                     add    6[bp],1
-                     pop    cx
-                     loop   lineaH
+                              mov    bp,sp
+                              mov    cx, 10[bp]
+    lineaH:                   
+                              push   cx
+                              mov    ax, 8[bp]                                                                                                                                                                                                                                     ; Color e interrupcion
+                              xor    bh,bh                                                                                                                                                                                                                                         ; página cero (la que se está viendo)
+                              mov    cx,6[bp]                                                                                                                                                                                                                                      ; columna
+                              mov    dx,4[bp]                                                                                                                                                                                                                                      ; fila
+                              int    10h
+                              add    6[bp],1
+                              pop    cx
+                              loop   lineaH
 
-                     xor    bp,bp
-                     retf   8
+                              xor    bp,bp
+                              retf   8
 LineaHorizontalP EndP
 
+    ; Dibujar una línea horizontal de la longitud solicitada pòr el usuario.
 LineaVerticalP Proc Far
-                     mov    bp,sp
-                     mov    cx, 10[bp]
-    lineaV:          
-                     push   cx
-                     mov    ax, 8[bp]                                                                                                                                                                                ; Color e interrupcion
-                     xor    bh,bh                                                                                                                                                                                    ; página cero (la que se está viendo)
-                     mov    cx,6[bp]                                                                                                                                                                                 ; columna
-                     mov    dx,4[bp]                                                                                                                                                                                 ; fila
-                     int    10h
-                     add    4[bp],1
-                     pop    cx
-                     loop   lineaV
+                              mov    bp,sp
+                              mov    cx, 10[bp]
+    lineaV:                   
+                              push   cx
+                              mov    ax, 8[bp]                                                                                                                                                                                                                                     ; Color e interrupcion
+                              xor    bh,bh                                                                                                                                                                                                                                         ; página cero (la que se está viendo)
+                              mov    cx,6[bp]                                                                                                                                                                                                                                      ; columna
+                              mov    dx,4[bp]                                                                                                                                                                                                                                      ; fila
+                              int    10h
+                              add    4[bp],1
+                              pop    cx
+                              loop   lineaV
 
-                     xor    bp,bp
-                     retf   8
+                              xor    bp,bp
+                              retf   8
 
 LineaVerticalP EndP
+
+    ; Dibujar una línea diagonal ascendente para el Rombo
+RomboDiagonalAscendenteP proc far
+                              mov    bp,sp
+                              mov    cx, 10[bp]
+    romboDA:                  
+                              push   cx
+                              mov    ax, 8[bp]                                                                                                                                                                                                                                     ; Color e interrupcion
+                              xor    bh,bh                                                                                                                                                                                                                                         ; página cero (la que se está viendo)
+                              mov    cx,6[bp]                                                                                                                                                                                                                                      ; columna
+                              mov    dx,4[bp]                                                                                                                                                                                                                                      ; fila
+                              int    10h
+                              sub    6[bp],1                                                                                                                                                                                                                                       ;avanzar un espacio a la derecha
+                              add    4[bp],1
+                              pop    cx
+                              loop   romboDA
+
+                              xor    bp,bp
+                              retf   8
+RomboDiagonalAscendenteP EndP
+
+    ; Linea diagonal descendente para el rombo
+RomboDiagonalDescendenteP proc far
+                              mov    bp,sp
+                              mov    cx, 10[bp]
+    romboDD:                  
+                              push   cx
+                              mov    ax, 8[bp]                                                                                                                                                                                                                                     ; Color e interrupcion
+                              xor    bh,bh                                                                                                                                                                                                                                         ; página cero (la que se está viendo)
+                              mov    cx,6[bp]                                                                                                                                                                                                                                      ; columna
+                              mov    dx,4[bp]                                                                                                                                                                                                                                      ; fila
+                              int    10h
+                              add    6[bp],1                                                                                                                                                                                                                                       ;avanzar un espacio a la derecha
+                              add    4[bp],1
+                              pop    cx
+                              loop   romboDD
+
+                              xor    bp,bp
+                              retf   8
+RomboDiagonalDescendenteP EndP
 
 
 
@@ -66,11 +108,11 @@ LineaVerticalP EndP
     ;  call InicializarDS
     ;---------------------------------------------------------
 InicializarDS Proc Far
-                     xor    ax,ax
-                     mov    bp,sp
-                     mov    ax,4[bp]
-                     mov    ds,ax
-                     RetF
+                              xor    ax,ax
+                              mov    bp,sp
+                              mov    ax,4[bp]
+                              mov    ds,ax
+                              RetF
 InicializarDS EndP
 
     ;---------------------------------------------------------
@@ -87,10 +129,10 @@ InicializarDS EndP
     ;    call ClearScreenP
     ;---------------------------------------------------------
 ClearScreenP Proc Far
-                     mov    ah,07h
-                     xor    al,al
-                     int    10h
-                     RetF   8*2
+                              mov    ah,07h
+                              xor    al,al
+                              int    10h
+                              RetF   8*2
 ClearScreenP EndP
 
     ;---------------------------------------------------------
@@ -101,13 +143,13 @@ ClearScreenP EndP
     ;otro para la comlumna
     ;---------------------------------------------------------
 WhereXYP Proc Far
-                     mov    ah,03h
-                     xor    bh,bh
-                     mov    bp,sp
-                     int    10h
-                     mov    6[bp],dh                                                                                                                                                                                 ;poner en "fila" el valor de la fila retornado
-                     mov    4[bp],dl                                                                                                                                                                                 ;poner en "columna" el valor de la columna retornado
-                     RetF
+                              mov    ah,03h
+                              xor    bh,bh
+                              mov    bp,sp
+                              int    10h
+                              mov    6[bp],dh                                                                                                                                                                                                                                      ;poner en "fila" el valor de la fila retornado
+                              mov    4[bp],dl                                                                                                                                                                                                                                      ;poner en "columna" el valor de la columna retornado
+                              RetF
 WhereXYP EndP
 
     ;---------------------------------------------------------
@@ -118,10 +160,10 @@ WhereXYP EndP
     ;  call GotoXYP
     ;---------------------------------------------------------
 GotoXYP Proc Far
-                     mov    ah,02h
-                     xor    bh,bh
-                     int    10h
-                     RetF
+                              mov    ah,02h
+                              xor    bh,bh
+                              int    10h
+                              RetF
 GotoXYP EndP
 
     ;--------------------------------------------------------
@@ -129,22 +171,22 @@ GotoXYP EndP
     ;al= caracter a imprimir, bl= color del caracter,
     ;cx= cantidad de caracteres a imprimir (pasar por pila)
 PrintCharColorP Proc Far
-                     mov    ah,09h
-                     xor    bh,bh
-                     mov    cx,4[bp]
-                     int    10h
-                     RetF
+                              mov    ah,09h
+                              xor    bh,bh
+                              mov    cx,4[bp]
+                              int    10h
+                              RetF
 PrintCharColorP EndP
 
     ;--------------------------------------------------------
     ;antes de llamar al proc en el programa principal se debe
     ;poner en el dl el caracter a imprimir
 PrintCharP Proc Far
-                     mov    bp,sp
-                     mov    ah,02h
-                     mov    dl,4[bp]
-                     int    21h
-                     RetF
+                              mov    bp,sp
+                              mov    ah,02h
+                              mov    dl,4[bp]
+                              int    21h
+                              RetF
 PrintCharP EndP
 
     ;---------------------------------------------------------
@@ -157,9 +199,9 @@ PrintCharP EndP
     ;    call PrintString
     ;---------------------------------------------------------
 PrintString Proc Far
-                     mov    ah,09h
-                     int    21h
-                     RetF   8*2
+                              mov    ah,09h
+                              int    21h
+                              RetF   8*2
 PrintString EndP
 
     ;---------------------------------------------------------
@@ -169,12 +211,12 @@ PrintString EndP
     ;ejem: 5 es un trebol, ya que el 5 de consola entra como 35h
     ;y eso nos da un 5 en decimal restandole 30h
 PrintNum Proc Far
-                     mov    bp,sp
-                     mov    ah,02h
-                     mov    dl,4[bp]
-                     add    dl,30h
-                     int    21h
-                     RetF   2
+                              mov    bp,sp
+                              mov    ah,02h
+                              mov    dl,4[bp]
+                              add    dl,30h
+                              int    21h
+                              RetF   2
 PrintNum EndP
 
     ;---------------------------------------------------------
@@ -191,27 +233,27 @@ PrintNum EndP
     ;   xor bp,bp
     ;---------------------------------------------------------
 ReadKey Proc Far
-                     mov    bp,sp
-                     mov    ah,01h
-                     int    21h
-                     mov    12h[bp],al
-                     RetF   7*2
+                              mov    bp,sp
+                              mov    ah,01h
+                              int    21h
+                              mov    12h[bp],al
+                              RetF   7*2
 ReadKey EndP
 
     ;Espera a que se presione una tecla con echo
 WaitKeyP Proc Far
-                     mov    ah,01h
-                     int    21h
-                     RetF
+                              mov    ah,01h
+                              int    21h
+                              RetF
 WaitKeyP EndP
 
     ;recibe una cadena de caracteres
 input_string PROC Far
-                     mov    bp,sp
-                     mov    dx,[bp + 4]
-                     mov    ah, 0Ah
-                     int    21h
-                     ret    2
+                              mov    bp,sp
+                              mov    dx,[bp + 4]
+                              mov    ah, 0Ah
+                              int    21h
+                              ret    2
 input_string ENDP
 
 

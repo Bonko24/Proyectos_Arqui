@@ -11,7 +11,7 @@
  ;DX: Fila, CX: Columna
 ;llamadas a procedimientos en proc.asm e include
 include macroF.asm
-extrn InicializarDS:Far, ClearScreenP:Far, WhereXYP:Far, GotoXYP:Far, PrintCharColorP:Far, PrintCharP:Far, PrintNum:Far, PrintString:Far, ReadKey:Far, WaitKeyP:Far, input_string:Far, EscribirPixelP:Far, LineaHorizontalP:Far, LineaVerticalP:Far
+extrn InicializarDS:Far, ClearScreenP:Far, WhereXYP:Far, GotoXYP:Far, PrintCharColorP:Far, PrintCharP:Far, PrintNum:Far, PrintString:Far, ReadKey:Far, WaitKeyP:Far, input_string:Far, EscribirPixelP:Far, LineaHorizontalP:Far, LineaVerticalP:Far, RomboDiagonalAscendenteP:Far,RomboDiagonalDescendenteP:Far
 
 
 Pila Segment
@@ -89,53 +89,54 @@ Codigo Segment
 
     Vacias:                
     ;modo grafico
-                           mov           ax,0012h                        ;modo grafico
+                           mov           ax,0012h
                            int           10h
 
     ;------------------------------------valores para cuadrado------------------------------------
+    ;Linea Horizontal Superior
                            mov           fila,85                         ;fila inicial
                            mov           columna,215                     ;columna inicial
+                           mov           cx,125                          ;Longitud de la linea
 
-                           
-    ;Linea Horizontal Superior
-                           mov           cx,125                          ;cuantas veces se ejecutara la linea
-                           push          cx                              ;almacenar el contador
-                           mov           ax, 0c09h                       ;Color y numero  interupcion
+                           push          cx
+                           mov           ax, 0c09h                       ;Color y numero de interupcion
                            push          ax
                            push          columna
                            push          fila
-                           call          LineaHorizontalP                ;Linea horizontal superior
+                           call          LineaHorizontalP                ;Dibuja un línea horizonal
 
     ; Linea vertical Izquierda
-                           mov           cx,125                          ;cuantas veces se ejecutara la linea
-                           push          cx                              ;almacenar el contador
-                           mov           ax, 0c09h                       ;Color y numero  interupcion
+                           mov           cx,125                          ;Longitud de la linea
+
+                           push          cx
+                           mov           ax, 0c09h                       ;Color y numero de interupcion
                            push          ax
                            push          columna
                            push          fila
-                           call          LineaVerticalP
+                           call          LineaVerticalP                  ;Dibuja un línea vertical
 
     ; Linea Horizontal Inferior
-                           mov           cx,125                          ;cuantas veces se ejecutara la linea
-                           mov           fila, 210
+                           mov           cx,125                          ;Longitud de la linea
+                           mov           fila, 210                       ;fila inicial
 
-                           push          cx                              ;almacenar el contador
-                           mov           ax, 0c09h                       ;Color y numero  interupcion
+                           push          cx
+                           mov           ax, 0c09h                       ;Color y numero de interupcion
                            push          ax
                            push          columna
                            push          fila
-                           call          LineaHorizontalP
+                           call          LineaHorizontalP                ;Dibuja un línea horizonal
 
     ; Linea vertical derecha
                            mov           cx,126                          ;cuantas veces se ejecutara la linea
-                           mov           fila,85
-                           mov           columna, 340
-                           push          cx                              ;almacenar el contador
-                           mov           ax, 0c09h                       ;Color y numero  interupcion
+                           mov           fila,85                         ;fila inicial
+                           mov           columna, 340                    ;columna inicial
+
+                           push          cx
+                           mov           ax, 0c09h                       ;Color y numero de interupcion
                            push          ax
                            push          columna
                            push          fila
-                           call          LineaVerticalP
+                           call          LineaVerticalP                  ;Dibuja un línea vertical
                            jmp           short siga
 
     puenteRellenas:        
@@ -146,96 +147,94 @@ Codigo Segment
     ; Linea Horizontal SUperior
                            mov           fila,55                         ;fila inicial
                            mov           columna,130                     ;columna inicial
-                           mov           cx,165                          ;cuantas veces se ejecutara la linea
+                           mov           cx,165                          ;Longitud de la linea
 
-                           push          cx                              ;almacenar el contador
-                           mov           ax, 0c08h                       ;Color y numero  interupcion
+                           push          cx
+                           mov           ax, 0c08h                       ;Color y numero de interupcion
                            push          ax
                            push          columna
                            push          fila
-                           call          LineaHorizontalP                ;Linea horizontal superior
+                           call          LineaHorizontalP                ;Dibuja un línea horizonal
 
 
     ; Linea vertical izquierda
-                           mov           cx,50                           ;cuantas veces se ejecutara la linea
+                           mov           cx,50                           ;Longitud de la linea
 
-                           push          cx                              ;almacenar el contador
-                           mov           ax, 0c08h                       ;Color y numero  interupcion
+                           push          cx
+                           mov           ax, 0c08h                       ;Color y numero de interupcion
                            push          ax
                            push          columna
                            push          fila
-                           call          LineaVerticalP
+                           call          LineaVerticalP                  ;Dibuja un línea vertical
                            
     ; Linea horizontal inferior
-                           mov           cx,166                          ;cuantas veces se ejecutara la linea
-                           mov           fila, 105
+                           mov           cx,166                          ;Longitud de la linea
+                           mov           fila,105                        ;fila inicial
 
-                           push          cx                              ;almacenar el contador
-                           mov           ax, 0c08h                       ;Color y numero  interupcion
+                           push          cx
+                           mov           ax, 0c08h                       ;Color y numero de interupcion
                            push          ax
                            push          columna
                            push          fila
-                           call          LineaHorizontalP                ;Linea horizontal superior
+                           call          LineaHorizontalP                ;Dibuja un línea horizontal
     ; Linea vertical derecha
-                           mov           cx,50                           ;cuantas veces se ejecutara la linea
-                           mov           fila,55
-                           mov           columna,295
+                           mov           cx,50                           ;Longitud de la linea
+                           mov           fila,55                         ;fila inicial
+                           mov           columna,295                     ;columna inicial
 
-                           mov           cx,50                           ;cuantas veces se ejecutara la linea
-                           push          cx                              ;almacenar el contador
-                           mov           ax, 0c08h                       ;Color y numero  interupcion
+                           push          cx
+                           mov           ax, 0c08h                       ;Color y numero de interupcion
                            push          ax
                            push          columna
                            push          fila
-                           call          LineaVerticalP
+                           call          LineaVerticalP                  ;Dibuja un línea vertical
 
     ;------------------------------------valores para rombo------------------------------------
+    ; Diagonal ascendente izquierda
                            mov           fila,120                        ;fila inicial
                            mov           columna,177                     ;columna inicial
-                           mov           cx,25                           ;cuantas veces se ejecutara la linea
+                           mov           cx,25                           ;longitud de la línea
 
-    rombo:                 
-                           push          cx                              ;almacenar el contador
-                           mov           cx,columna                      ;columna
-                           mov           dx,fila                         ;fila
-                           call          Color3                          ;llamar a pintar
-                           sub           columna,1                       ;avanzar un espacio a la derecha
-                           add           fila,1
-                           pop           cx                              ;recuperar el contador
-                           loop          rombo
+                           push          cx
+                           mov           ax, 0c06h                       ;Color y numero de interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          RomboDiagonalAscendenteP        ;Dibuja un línea diagonal ascendente
+                           
+    ; Diagonal descendente derecha
+                           mov           cx,25                           ;longitud de la línea
 
-                           mov           cx,25                           ;cuantas veces se ejecutara la linea
-    rombo2:                
-                           push          cx                              ;almacenar el contador
-                           mov           cx,columna                      ;columna
-                           mov           dx,fila                         ;fila
-                           call          Color3                          ;llamar a pintar
-                           add           columna,1
-                           add           fila,1                          ;avanzar un espacio abajo
-                           pop           cx                              ;recuperar el contador
-                           loop          rombo2
+                           push          cx
+                           mov           ax, 0c06h                       ;Color y numero de interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          RomboDiagonalDescendenteP       ;Dibuja un línea diagonal descendente
 
-                           mov           cx,25                           ;cuantas veces se ejecutara la linea
-    rombo3:                
-                           push          cx                              ;almacenar el contador
-                           mov           cx,columna                      ;columna
-                           mov           dx,fila                         ;fila
-                           call          Color3                          ;llamar a pintar
-                           add           columna,1                       ;avanzar un espacio a la derecha
-                           sub           fila,1                          ;avanzar un espacio arriba
-                           pop           cx                              ;recuperar el contador
-                           loop          rombo3
+    ; Diagonal descendete izquierda
+                           mov           fila, 145                       ;fila inicial
+                           mov           columna, 152                    ;columna inicial
+                           mov           cx,25                           ;longitud de la línea
 
-                           mov           cx,25                           ;cuantas veces se ejecutara la linea
-    rombo4:                
-                           push          cx                              ;almacenar el contador
-                           mov           cx,columna                      ;columna
-                           mov           dx,fila                         ;fila
-                           call          Color3                          ;llamar a pintar
-                           sub           fila,1                          ;avanzar un espacio arriba
-                           sub           columna,1                       ;avanzar un espacio a la izquierda
-                           pop           cx                              ;recuperar el contador
-                           loop          rombo4
+                           push          cx
+                           mov           ax, 0c06h                       ;Color y numero de interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          RomboDiagonalDescendenteP       ;Dibuja un línea diagonal descendente
+
+    ; Diagonal ascendente derecha
+                           mov           columna,202                     ;columna inicial
+                           mov           cx,25                           ;longitud de la línea
+
+                           push          cx
+                           mov           ax, 0c06h                       ;Color y numero de interupcion
+                           push          ax
+                           push          columna
+                           push          fila
+                           call          RomboDiagonalAscendenteP        ;Dibuja un línea diagonal ascendente
+                           
                            jmp           short siga1
 
     puenteRellenas1:       
